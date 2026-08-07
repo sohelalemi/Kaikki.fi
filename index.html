@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Kaikki.fi – modern marketplace for Finland">
+  <title>Kaikki.fi – Osta, myy ja löydä</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="nav">
+    <a class="brand" href="#">Kaikki.fi</a>
+    <div class="nav-actions">
+      <select id="lang" aria-label="Language">
+        <option value="fi">FI</option><option value="en">EN</option><option value="fa">FA</option><option value="ru">RU</option>
+      </select>
+      <button class="ghost" id="login">Kirjaudu</button>
+      <button id="sell">+ Myy</button>
+    </div>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <span class="eyebrow">MARKKINAPAIKKA SUOMESSA</span>
+    <h1 id="headline">Kaikki mitä etsit, yhdestä paikasta.</h1>
+    <p id="sub">Osta ja myy tavaroita sekä löydä koteja myyntiin ja vuokralle.</p>
+    <div class="search">
+      <input id="q" placeholder="Mitä etsit?">
+      <select id="city">
+        <option>Kaikki Suomi</option><option>Lahti</option><option>Helsinki</option><option>Espoo</option><option>Vantaa</option><option>Tampere</option>
+      </select>
+      <button id="searchBtn">Hae</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2 id="catTitle">Kategoriat</h2></div>
+    <div class="categories">
+      <button data-cat="Autot">🚗<span>Autot</span></button>
+      <button data-cat="Koti">🛋️<span>Koti & huonekalut</span></button>
+      <button data-cat="Elektroniikka">📱<span>Elektroniikka</span></button>
+      <button data-cat="Vaatteet">👕<span>Vaatteet</span></button>
+      <button data-cat="Työt">💼<span>Työt</span></button>
+      <button data-cat="Palvelut">🧰<span>Palvelut</span></button>
+      <button data-cat="Asunnot">🏠<span>Asunnot</span></button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title"><h2 id="latest">Uusimmat ilmoitukset</h2><button class="link" id="all">Näytä kaikki</button></div>
+    <div class="grid" id="cards"></div>
+  </section>
+
+  <section class="homes">
+    <div>
+      <span class="eyebrow">KAIKKI KODIT</span>
+      <h2 id="homeTitle">Myy tai vuokraa kotisi</h2>
+      <p id="homeText">Yksityiset voivat ilmoittaa asunnon myyntiin tai vuokralle helposti.</p>
+    </div>
+    <button id="homeBtn">Lisää asunto</button>
+  </section>
+</main>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="panel">
+    <button class="close" id="close" aria-label="Close">×</button>
+    <h2 id="modalTitle">Lisää ilmoitus</h2>
+    <form id="form">
+      <label>Otsikko<input required id="title"></label>
+      <label>Hinta (€)<input required type="number" min="0" id="price"></label>
+      <label>Kaupunki<input required id="place" value="Lahti"></label>
+      <label>Kategoria<select id="category"><option>Elektroniikka</option><option>Koti</option><option>Autot</option><option>Vaatteet</option><option>Työt</option><option>Palvelut</option><option>Asunnot</option></select></label>
+      <label>Kuvat<input id="photos" type="file" accept="image/*" multiple></label>
+      <label>Kuvaus<textarea id="desc"></textarea></label>
+      <button type="submit">Julkaise ilmoitus</button>
+    </form>
+  </div>
+</div>
+<footer>© 2026 Kaikki.fi · MVP prototype</footer>
+<script src="app.js"></script>
+</body>
+</html>
