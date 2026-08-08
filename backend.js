@@ -4,10 +4,11 @@
  const url=window.KAIKKI_SUPABASE_URL, key=window.KAIKKI_SUPABASE_ANON_KEY;
  const enabled=Boolean(url&&key&&window.supabase);
  const client=enabled?window.supabase.createClient(url,key):null;
+ const emailRedirectTo='https://sohelalemi.github.io/Kaikki.fi/';
  window.KaikkiBackend={
   enabled, client,
   async session(){if(!client)return null;const {data}=await client.auth.getSession();return data.session},
-  async signUp(email,password,displayName=''){if(!client)throw new Error('Backend ei ole vielä yhdistetty.');const {data,error}=await client.auth.signUp({email,password,options:{data:{display_name:displayName}}});if(error)throw error;return data},
+  async signUp(email,password,displayName=''){if(!client)throw new Error('Backend ei ole vielä yhdistetty.');const {data,error}=await client.auth.signUp({email,password,options:{emailRedirectTo,data:{display_name:displayName}}});if(error)throw error;return data},
   async signIn(email,password){if(!client)throw new Error('Backend ei ole vielä yhdistetty.');const {data,error}=await client.auth.signInWithPassword({email,password});if(error)throw error;return data},
   async signOut(){if(client)await client.auth.signOut()},
   async loadListings(){if(!client)return null;const {data,error}=await client.from('listings').select('*').order('created_at',{ascending:false});if(error)throw error;return data},
