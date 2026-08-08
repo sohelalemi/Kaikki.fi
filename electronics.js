@@ -1,134 +1,132 @@
 (() => {
-  const electronicsTypes = [
-    ['Puhelimet','📱'],
-    ['Tabletit','📲'],
-    ['Televisiot','📺'],
-    ['Tietokoneet','💻'],
-    ['Ääni & kuulokkeet','🎧'],
-    ['Kamerat','📷'],
-    ['Pelikonsolit','🎮'],
-    ['Älykellot','⌚'],
-    ['Tarvikkeet','🔌'],
-    ['Muu elektroniikka','🔋']
-  ];
+  const subcategories = {
+    Autot: [['Henkilöautot','🚗'],['Pakettiautot','🚐'],['Moottoripyörät','🏍️'],['Mopot & skootterit','🛵'],['Veneet','🛥️'],['Matkailuautot & vaunut','🚐'],['Renkaat & vanteet','🛞'],['Varaosat','⚙️'],['Autotarvikkeet','🧰'],['Muut ajoneuvot','🚜']],
+    Koti: [['Sohvat & nojatuolit','🛋️'],['Pöydät & tuolit','🪑'],['Sängyt & patjat','🛏️'],['Kaapit & säilytys','🗄️'],['Valaisimet','💡'],['Kodinkoneet','🧺'],['Keittiö','🍽️'],['Sisustus','🖼️'],['Piha & puutarha','🌿'],['Työkalut','🛠️']],
+    Elektroniikka: [['Puhelimet','📱'],['Tabletit','📲'],['Televisiot','📺'],['Tietokoneet','💻'],['Ääni & kuulokkeet','🎧'],['Kamerat','📷'],['Pelikonsolit','🎮'],['Älykellot','⌚'],['Tarvikkeet','🔌'],['Muu elektroniikka','🔋']],
+    Vaatteet: [['Naisten vaatteet','👗'],['Miesten vaatteet','👔'],['Lasten vaatteet','🧒'],['Kengät','👟'],['Laukut','👜'],['Korut & kellot','💍'],['Urheiluvaatteet','🏃'],['Asusteet','🧢'],['Juhlavaatteet','✨'],['Muut vaatteet','👕']],
+    Työt: [['Kuljetus & logistiikka','🚚'],['Rakennus','🏗️'],['Ravintola & hotelli','🍽️'],['Myynti & asiakaspalvelu','🛍️'],['Siivous','🧹'],['Hoito & terveys','🩺'],['IT & teknologia','💻'],['Toimisto','🗂️'],['Teollisuus','🏭'],['Muut työt','💼']],
+    Palvelut: [['Muuttoapu','📦'],['Siivous','🧹'],['Remontti','🔨'],['Autopalvelut','🔧'],['Kuljetus','🚚'],['Kauneus & hyvinvointi','💇'],['Opetus & kurssit','📚'],['IT-apu','🖥️'],['Valokuvaus','📸'],['Muut palvelut','🧰']],
+    Asunnot: [['Kerrostalo','🏢'],['Rivitalo','🏘️'],['Omakotitalo','🏡'],['Paritalo','🏠'],['Mökki','🌲'],['Tontti','📐'],['Autotalli & varasto','🚪'],['Liiketila','🏬'],['Huone','🛏️'],['Muu asunto','🏠']]
+  };
 
-  let electronicsFilter = '';
+  let subtypeFilter = '';
 
   const style = document.createElement('style');
   style.textContent = `
-    .electronics-subcats{display:none;margin-top:14px;padding:16px;background:#fff;border:1px solid #e4e7eb;border-radius:16px}
-    .electronics-subcats.show{display:block}
-    .electronics-subcats h3{margin:0 0 12px;font-size:16px}
-    .electronics-chips{display:flex;gap:8px;flex-wrap:wrap}
-    .electronics-chips button{background:#f8fafc;color:#334155;border:1px solid #e2e8f0;padding:9px 12px;border-radius:999px;font-size:13px}
-    .electronics-chips button:hover,.electronics-chips button.active{background:#1565d8;color:#fff;border-color:#1565d8}
-    .electronics-type{display:inline-block;margin-top:8px;margin-left:6px;background:#eef4ff;color:#1565d8;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:800}
-    @media(max-width:700px){.electronics-chips{gap:6px}.electronics-chips button{font-size:12px;padding:8px 10px}}
+    .subcategory-panel{display:none;margin-top:14px;padding:16px;background:#fff;border:1px solid #e4e7eb;border-radius:16px}
+    .subcategory-panel.show{display:block}
+    .subcategory-panel h3{margin:0 0 12px;font-size:16px}
+    .subcategory-chips{display:flex;gap:8px;flex-wrap:wrap}
+    .subcategory-chips button{background:#f8fafc;color:#334155;border:1px solid #e2e8f0;padding:9px 12px;border-radius:999px;font-size:13px}
+    .subcategory-chips button:hover,.subcategory-chips button.active{background:#1565d8;color:#fff;border-color:#1565d8}
+    .subcategory-tag{display:inline-block;margin-top:8px;margin-left:6px;background:#eef4ff;color:#1565d8;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:800}
+    @media(max-width:700px){.subcategory-chips{gap:6px}.subcategory-chips button{font-size:12px;padding:8px 10px}}
   `;
   document.head.appendChild(style);
 
   const categories = document.querySelector('.categories');
-  if (!categories) return;
-
-  const panel = document.createElement('div');
-  panel.className = 'electronics-subcats';
-  panel.id = 'electronicsSubcats';
-  panel.innerHTML = `<h3>Elektroniikan alaluokat</h3><div class="electronics-chips">${electronicsTypes.map(([name,icon]) => `<button type="button" data-electronics="${name}">${icon} ${name}</button>`).join('')}</div>`;
-  categories.insertAdjacentElement('afterend', panel);
-
   const categorySelect = document.querySelector('#category');
   const housingWrap = document.querySelector('#housingTypeWrap');
-  const electronicsWrap = document.createElement('label');
-  electronicsWrap.id = 'electronicsTypeWrap';
-  electronicsWrap.hidden = true;
-  electronicsWrap.innerHTML = `Elektroniikan tyyppi<select id="electronicsType">${electronicsTypes.map(([name]) => `<option value="${name}">${name}</option>`).join('')}</select>`;
-  if (housingWrap) housingWrap.insertAdjacentElement('afterend', electronicsWrap);
+  if (!categories || !categorySelect) return;
 
-  function syncElectronicsForm(){
-    electronicsWrap.hidden = categorySelect.value !== 'Elektroniikka';
+  const panel = document.createElement('div');
+  panel.className = 'subcategory-panel';
+  panel.id = 'subcategoryPanel';
+  categories.insertAdjacentElement('afterend', panel);
+
+  const subtypeWrap = document.createElement('label');
+  subtypeWrap.id = 'subtypeWrap';
+  subtypeWrap.innerHTML = `Alaluokka<select id="subtype"></select>`;
+  if (housingWrap) housingWrap.insertAdjacentElement('afterend', subtypeWrap);
+  const subtypeSelect = document.querySelector('#subtype');
+
+  function currentTypes(){ return subcategories[categorySelect.value] || []; }
+  function syncSubtypeForm(){
+    const types = currentTypes();
+    subtypeWrap.hidden = !types.length;
+    subtypeSelect.innerHTML = types.map(([name]) => `<option value="${name}">${name}</option>`).join('');
   }
-  categorySelect.addEventListener('change', syncElectronicsForm);
-  syncElectronicsForm();
+  categorySelect.addEventListener('change', syncSubtypeForm);
+  syncSubtypeForm();
+
+  function renderPanel(){
+    const types = subcategories[filter] || [];
+    if (!types.length){ panel.classList.remove('show'); panel.innerHTML=''; return; }
+    panel.innerHTML = `<h3>${escapeHtml(filter)} – alaluokat</h3><div class="subcategory-chips">${types.map(([name,icon]) => `<button type="button" data-subtype="${name}" class="${subtypeFilter===name?'active':''}">${icon} ${name}</button>`).join('')}</div>`;
+    panel.classList.add('show');
+    panel.querySelectorAll('[data-subtype]').forEach(btn => btn.onclick = () => {
+      subtypeFilter = subtypeFilter === btn.dataset.subtype ? '' : btn.dataset.subtype;
+      render();
+      document.querySelector('#latest')?.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  }
 
   const oldRender = render;
   render = function(){
     oldRender();
-    const isElectronics = filter === 'Elektroniikka';
-    panel.classList.toggle('show', isElectronics);
-    document.querySelectorAll('[data-electronics]').forEach(btn => btn.classList.toggle('active', btn.dataset.electronics === electronicsFilter));
-    if (isElectronics && electronicsFilter) {
+    renderPanel();
+    if (subtypeFilter) {
       document.querySelectorAll('#cards .card').forEach(card => {
         const item = items.find(x => x.id === card.dataset.id);
-        if (!item || item.electronicsType !== electronicsFilter) card.style.display = 'none';
+        if (!item || item.subtype !== subtypeFilter) card.style.display = 'none';
       });
       const visible = [...document.querySelectorAll('#cards .card')].some(card => card.style.display !== 'none');
-      if (!visible) cards.innerHTML = '<p class="empty">Ei ilmoituksia tässä elektroniikan alaluokassa.</p>';
+      if (!visible) cards.innerHTML = '<p class="empty">Ei ilmoituksia tässä alaluokassa.</p>';
     }
     document.querySelectorAll('#cards .card').forEach(card => {
       const item = items.find(x => x.id === card.dataset.id);
-      if (item?.electronicsType) {
+      if (item?.subtype) {
         const body = card.querySelector('.card-body');
         const condition = body?.querySelector('.condition');
-        if (condition && !body.querySelector('.electronics-type')) condition.insertAdjacentHTML('afterend', `<span class="electronics-type">${escapeHtml(item.electronicsType)}</span>`);
+        if (condition && !body.querySelector('.subcategory-tag')) condition.insertAdjacentHTML('afterend', `<span class="subcategory-tag">${escapeHtml(item.subtype)}</span>`);
       }
     });
   };
 
-  document.querySelectorAll('[data-electronics]').forEach(btn => {
-    btn.onclick = () => {
-      filter = 'Elektroniikka';
-      housingFilter = '';
-      electronicsFilter = electronicsFilter === btn.dataset.electronics ? '' : btn.dataset.electronics;
-      render();
-      document.querySelector('#latest')?.scrollIntoView({behavior:'smooth',block:'start'});
-    };
-  });
-
   document.querySelectorAll('[data-cat]').forEach(btn => {
     const previous = btn.onclick;
     btn.onclick = e => {
+      const oldFilter = filter;
       previous?.call(btn,e);
-      if (btn.dataset.cat === 'Elektroniikka') {
-        if (filter !== 'Elektroniikka') electronicsFilter = '';
-      } else {
-        electronicsFilter = '';
-      }
+      if (filter !== oldFilter || filter !== btn.dataset.cat) subtypeFilter='';
       render();
     };
   });
+
+  const homeSale = document.querySelector('#homesSale');
+  const homeRent = document.querySelector('#homesRent');
+  [homeSale,homeRent].forEach(btn => { if(!btn) return; const old=btn.onclick; btn.onclick=e=>{subtypeFilter='';old?.call(btn,e);render();}; });
 
   const form = document.querySelector('#form');
   const oldSubmit = form.onsubmit;
   form.onsubmit = e => {
     const selectedCategory = categorySelect.value;
-    const selectedType = selectedCategory === 'Elektroniikka' ? document.querySelector('#electronicsType').value : '';
+    const selectedSubtype = (subcategories[selectedCategory]||[]).length ? subtypeSelect.value : '';
     oldSubmit(e);
-    if (selectedCategory === 'Elektroniikka') {
-      const newest = items.find(x => x.id?.startsWith('user-') && x.c === 'Elektroniikka' && !x.electronicsType);
-      if (newest) {
-        newest.electronicsType = selectedType;
-        persist();
-        electronicsFilter = selectedType;
-        filter = 'Elektroniikka';
-        render();
-      }
+    const newest = items.find(x => x.id?.startsWith('user-') && x.c === selectedCategory && !x.subtype);
+    if (newest && selectedSubtype) {
+      newest.subtype = selectedSubtype;
+      persist();
+      filter = selectedCategory;
+      subtypeFilter = selectedSubtype;
+      render();
     }
-    syncElectronicsForm();
+    syncSubtypeForm();
   };
 
   const oldOpenDetails = openDetails;
   openDetails = function(id){
     oldOpenDetails(id);
     const item = items.find(x => x.id === id);
-    if (item?.electronicsType) {
+    if (item?.subtype) {
       const cat = document.querySelector('#detailsContent .detail-cat');
-      if (cat) cat.textContent += ' · ' + item.electronicsType;
+      if (cat && !cat.textContent.includes(item.subtype)) cat.textContent += ' · ' + item.subtype;
     }
   };
 
   const allBtn = document.querySelector('#all');
   const oldAll = allBtn.onclick;
-  allBtn.onclick = e => { electronicsFilter=''; oldAll?.call(allBtn,e); render(); };
+  allBtn.onclick = e => { subtypeFilter=''; oldAll?.call(allBtn,e); render(); };
 
   render();
 })();
