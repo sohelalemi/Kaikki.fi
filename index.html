@@ -36,7 +36,10 @@
     <button data-cat="Autot">🚗<span>Autot</span></button><button data-cat="Koti">🛋️<span>Koti & huonekalut</span></button><button data-cat="Elektroniikka">📱<span>Elektroniikka</span></button><button data-cat="Vaatteet">👕<span>Vaatteet</span></button><button data-cat="Työt">💼<span>Työt</span></button><button data-cat="Palvelut">🧰<span>Palvelut</span></button><button data-cat="Asunnot">🏠<span>Asunnot</span></button>
   </div></section>
   <section><div class="section-title"><h2 id="latest">Uusimmat ilmoitukset</h2><button class="link" id="all">Näytä kaikki</button></div><div class="grid" id="cards"></div></section>
-  <section class="homes"><div><span class="eyebrow">KAIKKI KODIT</span><h2 id="homeTitle">Myy tai vuokraa kotisi</h2><p id="homeText">Yksityiset voivat ilmoittaa asunnon myyntiin tai vuokralle helposti.</p></div><button id="homeBtn">Lisää asunto</button></section>
+  <section class="homes">
+    <div><span class="eyebrow">KAIKKI KODIT</span><h2 id="homeTitle">Asunnot myyntiin ja vuokralle</h2><p id="homeText">Selaa myytäviä ja vuokrattavia asuntoja tai lisää oma ilmoituksesi.</p></div>
+    <div class="home-actions"><button class="home-filter" id="homesSale">🏡 Myytävät</button><button class="home-filter" id="homesRent">🔑 Vuokrattavat</button><button class="home-add" id="homeBtn">+ Lisää asunto</button></div>
+  </section>
 </main>
 <div class="modal" id="modal" aria-hidden="true">
   <div class="panel publish-panel">
@@ -47,6 +50,7 @@
       <label>Otsikko<input required id="title" maxlength="80" placeholder="Esim. iPhone 15 Pro 256GB"></label>
       <div class="form-row"><label>Hinta (€)<input required type="number" min="0" id="price" placeholder="0"></label><label>Kunto<select id="condition"><option>Hyvä</option><option>Uudenveroinen</option><option>Tyydyttävä</option><option>Uusi</option></select></label></div>
       <div class="form-row"><label>Kaupunki<input required id="place" value="Lahti" placeholder="Kirjoita mikä tahansa kunta tai kaupunki"></label><label>Kategoria<select id="category"><option>Elektroniikka</option><option>Koti</option><option>Autot</option><option>Vaatteet</option><option>Työt</option><option>Palvelut</option><option>Asunnot</option></select></label></div>
+      <label id="housingTypeWrap" hidden>Asunnon ilmoitustyyppi<select id="housingType"><option value="Myynti">Myynti</option><option value="Vuokra">Vuokra</option></select></label>
       <label>Kuva<input id="photos" type="file" accept="image/*"><span class="input-help">Yksi kuva, enintään noin 1 MB tässä MVP-versiossa.</span></label>
       <div id="photoPreview" class="photo-preview" hidden></div>
       <label>Kuvaus<textarea id="desc" maxlength="1000" placeholder="Kerro tuotteesta, noudosta ja muista tärkeistä tiedoista."></textarea></label>
