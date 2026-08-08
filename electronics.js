@@ -20,7 +20,10 @@
     .subcategory-chips button{background:#f8fafc;color:#334155;border:1px solid #e2e8f0;padding:9px 12px;border-radius:999px;font-size:13px}
     .subcategory-chips button:hover,.subcategory-chips button.active{background:#1565d8;color:#fff;border-color:#1565d8}
     .subcategory-tag{display:inline-block;margin-top:8px;margin-left:6px;background:#eef4ff;color:#1565d8;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:800}
-    @media(max-width:700px){.subcategory-chips{gap:6px}.subcategory-chips button{font-size:12px;padding:8px 10px}}
+    .housing-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .housing-choice{min-height:92px;border-radius:16px!important;font-size:17px!important;display:flex;align-items:center;justify-content:center;gap:8px;background:#f8fafc!important;color:#17202a!important;border:1px solid #dbe3ee!important}
+    .housing-choice:hover,.housing-choice.active{background:#1565d8!important;color:#fff!important;border-color:#1565d8!important;box-shadow:0 8px 22px #1565d825}
+    @media(max-width:700px){.subcategory-chips{gap:6px}.subcategory-chips button{font-size:12px;padding:8px 10px}.housing-choice-grid{grid-template-columns:1fr 1fr}.housing-choice{min-height:76px;font-size:15px!important}}
   `;
   document.head.appendChild(style);
 
@@ -50,6 +53,18 @@
   syncSubtypeForm();
 
   function renderPanel(){
+    if (filter === 'Asunnot') {
+      panel.innerHTML = `<h3>Asunnot</h3><div class="housing-choice-grid"><button type="button" class="housing-choice ${housingFilter==='Myynti'?'active':''}" data-housing-choice="Myynti">🏡 Myytävät asunnot</button><button type="button" class="housing-choice ${housingFilter==='Vuokra'?'active':''}" data-housing-choice="Vuokra">🔑 Vuokra-asunnot</button></div>`;
+      panel.classList.add('show');
+      panel.querySelectorAll('[data-housing-choice]').forEach(btn => btn.onclick = () => {
+        subtypeFilter = '';
+        housingFilter = housingFilter === btn.dataset.housingChoice ? '' : btn.dataset.housingChoice;
+        filter = 'Asunnot';
+        render();
+        document.querySelector('#latest')?.scrollIntoView({behavior:'smooth',block:'start'});
+      });
+      return;
+    }
     const types = subcategories[filter] || [];
     if (!types.length){ panel.classList.remove('show'); panel.innerHTML=''; return; }
     panel.innerHTML = `<h3>${escapeHtml(filter)} – alaluokat</h3><div class="subcategory-chips">${types.map(([name,icon]) => `<button type="button" data-subtype="${name}" class="${subtypeFilter===name?'active':''}">${icon} ${name}</button>`).join('')}</div>`;
@@ -89,6 +104,7 @@
       const oldFilter = filter;
       previous?.call(btn,e);
       if (filter !== oldFilter || filter !== btn.dataset.cat) subtypeFilter='';
+      if (btn.dataset.cat === 'Asunnot' && filter === 'Asunnot') subtypeFilter='';
       render();
     };
   });
@@ -108,7 +124,7 @@
       newest.subtype = selectedSubtype;
       persist();
       filter = selectedCategory;
-      subtypeFilter = selectedSubtype;
+      subtypeFilter = selectedCategory === 'Asunnot' ? '' : selectedSubtype;
       render();
     }
     syncSubtypeForm();
