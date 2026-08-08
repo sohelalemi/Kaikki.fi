@@ -5,6 +5,7 @@
  const css=document.createElement('style');
  css.textContent=`
  #authModal .auth-tabs{display:flex;gap:8px;margin:8px 0 16px}#authModal .auth-tabs button{flex:1;background:#eef4ff;color:#1565d8}#authModal .auth-tabs button.active{background:#1565d8;color:#fff}
+ #authModal #nameWrap[hidden]{display:none!important}
  #authModal .auth-message{font-size:13px;margin:10px 0;min-height:18px}.auth-user-menu{display:flex;gap:8px;align-items:center}.auth-email{font-size:12px;color:#64748b;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  `;document.head.appendChild(css);
 
@@ -12,10 +13,11 @@
 
  const modal=document.querySelector('#authModal'),loginBtn=document.querySelector('#login'),closeBtn=document.querySelector('#authClose'),form=document.querySelector('#authForm'),msg=document.querySelector('#authMessage'),nameWrap=document.querySelector('#nameWrap'),nameInput=document.querySelector('#authName'),emailInput=document.querySelector('#authEmail'),passInput=document.querySelector('#authPassword'),submit=document.querySelector('#authSubmit'),tabLogin=document.querySelector('#tabLogin'),tabSignup=document.querySelector('#tabSignup');
  let mode='login';
- function openAuth(){modal.classList.add('show');modal.setAttribute('aria-hidden','false')}
+ function openAuth(){setMode('login');modal.classList.add('show');modal.setAttribute('aria-hidden','false')}
  function closeAuth(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');msg.textContent=''}
- function setMode(next){mode=next;const signup=mode==='signup';tabLogin.classList.toggle('active',!signup);tabSignup.classList.toggle('active',signup);nameWrap.hidden=!signup;nameInput.required=signup;submit.textContent=signup?'Luo tili':'Kirjaudu';document.querySelector('#authTitle').textContent=signup?'Luo tili':'Kirjaudu';passInput.autocomplete=signup?'new-password':'current-password';msg.textContent=''}
+ function setMode(next){mode=next;const signup=mode==='signup';tabLogin.classList.toggle('active',!signup);tabSignup.classList.toggle('active',signup);nameWrap.hidden=!signup;nameInput.required=signup;if(!signup)nameInput.value='';submit.textContent=signup?'Luo tili':'Kirjaudu';document.querySelector('#authTitle').textContent=signup?'Luo tili':'Kirjaudu';passInput.autocomplete=signup?'new-password':'current-password';msg.textContent=''}
  tabLogin.onclick=()=>setMode('login');tabSignup.onclick=()=>setMode('signup');closeBtn.onclick=closeAuth;modal.onclick=e=>{if(e.target===modal)closeAuth()};
+ setMode('login');
 
  async function refreshAuthUI(){
   const session=await B.session();
@@ -44,8 +46,6 @@
   try{const rows=await B.loadListings();if(!Array.isArray(rows))return;const remote=rows.map(dbToItem);const remoteIds=new Set(remote.map(x=>x.dbId));items=items.filter(x=>!x.dbId||!remoteIds.has(x.dbId));items=[...remote,...items];render()}catch(err){console.warn('Kaikki.fi listings load failed',err)}
  }
 
- // Keep the existing MVP publish flow, then also persist the freshly created listing to Supabase when signed in.
- const existingSubmit=form=>form;
  const listingForm=document.querySelector('#form');
  if(listingForm){
   const previous=listingForm.onsubmit;
