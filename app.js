@@ -12,13 +12,14 @@ let favorites=new Set(JSON.parse(localStorage.getItem('kaikki-favorites')||'[]')
 const cards=document.querySelector('#cards');
 function iconFor(c){return {Elektroniikka:'📱',Koti:'🛋️',Autot:'🚗',Vaatteet:'👕',Työt:'💼',Palvelut:'🧰',Asunnot:'🏠'}[c]||'📦'}
 function priceText(x){return x.p?x.p.toLocaleString('fi-FI')+' €':'Sopimuksen mukaan'}
-function escapeHtml(s=''){return String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
+function escapeHtml(s=''){return String(s).replace(/[&<>'\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[m]))}
 function persist(){localStorage.setItem('kaikki-items',JSON.stringify(items.filter(x=>!x.id.startsWith('seed-'))))}
 function persistFavorites(){localStorage.setItem('kaikki-favorites',JSON.stringify([...favorites]))}
 function mediaMarkup(x,detail=false){return x.photo?`<img class="listing-image${detail?' detail-image':''}" src="${x.photo}" alt="${escapeHtml(x.t)}">`:`<span class="listing-icon">${x.icon}</span>`}
 function render(){
- const q=document.querySelector('#q').value.trim().toLowerCase(),city=document.querySelector('#city').value;
- const list=items.filter(x=>(!filter||x.c===filter)&&(!q||(x.t+' '+x.desc+' '+x.city).toLowerCase().includes(q))&&(city==='Kaikki Suomi'||x.city===city)).sort((a,b)=>(b.created||0)-(a.created||0));
+ const q=document.querySelector('#q').value.trim().toLowerCase();
+ const city=document.querySelector('#city').value.trim().toLowerCase();
+ const list=items.filter(x=>(!filter||x.c===filter)&&(!q||(x.t+' '+x.desc+' '+x.city).toLowerCase().includes(q))&&(!city||x.city.toLowerCase().includes(city))).sort((a,b)=>(b.created||0)-(a.created||0));
  cards.innerHTML=list.map(x=>`<article class="card" data-id="${x.id}"><button class="fav ${favorites.has(x.id)?'active':''}" data-fav="${x.id}" aria-label="Suosikki">${favorites.has(x.id)?'♥':'♡'}</button><div class="photo" data-open="${x.id}">${mediaMarkup(x)}</div><div class="card-body" data-open="${x.id}"><h3>${escapeHtml(x.t)}</h3><div class="price">${priceText(x)}</div><div class="meta">${escapeHtml(x.city)} · ${escapeHtml(x.c)}</div>${x.condition?`<div class="condition">${escapeHtml(x.condition)}</div>`:''}<button class="reserve" data-open="${x.id}">Näytä ilmoitus</button></div></article>`).join('')||'<p class="empty">Ei tuloksia. Kokeile toista hakua tai kaupunkia.</p>';
  document.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>openDetails(el.dataset.open));
  document.querySelectorAll('[data-fav]').forEach(el=>el.onclick=e=>{e.stopPropagation();toggleFavorite(el.dataset.fav)});
@@ -34,7 +35,11 @@ function openDetails(id){
 function closeDetails(){const m=document.querySelector('#detailsModal');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true')}}
 render();
 document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{filter=filter===b.dataset.cat?'':b.dataset.cat;render()});
-document.querySelector('#searchBtn').onclick=render;document.querySelector('#q').addEventListener('keydown',e=>{if(e.key==='Enter')render()});document.querySelector('#city').onchange=render;document.querySelector('#all').onclick=()=>{filter='';document.querySelector('#q').value='';document.querySelector('#city').value='Kaikki Suomi';render()};
+document.querySelector('#searchBtn').onclick=render;
+document.querySelector('#q').addEventListener('keydown',e=>{if(e.key==='Enter')render()});
+document.querySelector('#city').addEventListener('input',render);
+document.querySelector('#city').addEventListener('keydown',e=>{if(e.key==='Enter')render()});
+document.querySelector('#all').onclick=()=>{filter='';document.querySelector('#q').value='';document.querySelector('#city').value='';render()};
 const modal=document.querySelector('#modal');function openModal(){modal.classList.add('show');modal.setAttribute('aria-hidden','false')}function closeModal(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');resetPhoto()}
 document.querySelector('#sell').onclick=openModal;document.querySelector('#homeBtn').onclick=()=>{openModal();document.querySelector('#category').value='Asunnot'};document.querySelector('#close').onclick=closeModal;modal.onclick=e=>{if(e.target===modal)closeModal()};
 const photoInput=document.querySelector('#photos'),preview=document.querySelector('#photoPreview');
