@@ -37,7 +37,7 @@
   Koti:{fields:[['Tyyppi','type','__TYPE__'],['Materiaali','material',['Puu','Metalli','Lasi','Muovi','Nahka','Kangas','MDF','Muu']],['Väri','color',colors],['Mitat','dimensions',null]]},
   Työt:{fields:[['Työsuhde','jobtype',['Kokoaikainen','Osa-aikainen','Keikkatyö','Määräaikainen','Vakituinen']],['Työpaikka / yritys','company',null]]},
   Palvelut:{fields:[['Hinnoittelu','pricing',['Kiinteä hinta','Tuntihinta','Sopimuksen mukaan']],['Palvelualue','area',null]]},
-  Asunnot:{fields:[['Tyyppi','type','__TYPE__'],['Pinta-ala (m²)','area',null],['Huoneet','rooms',['1','2','3','4','5','6+']],['Rakennusvuosi','built',null],['Osoite','address',null]]}
+  Asunnot:{fields:[['Tyyppi','type','__TYPE__'],['Pinta-ala','area',['11–30 m²','31–50 m²','51–70 m²','71–90 m²','91–120 m²','121–150 m²','151–200 m²','Yli 200 m²']],['Hintaluokka','priceRange',['200–499 €','500–799 €','800–1 199 €','1 200–1 999 €','2 000–2 999 €','3 000–4 999 €','5 000 €+']],['Huoneet','rooms',['1','2','3','4','5','6+']],['Rakennusvuosi','built',null],['Osoite','address',null]]}
  };
  const wrap=document.createElement('div');wrap.id='categoryExtraFields';sub.closest('label').insertAdjacentElement('afterend',wrap);
  function optionsFor(opts){if(opts==='__TYPE__')return typeMaps[cat.value]?.[sub.value]||['Muu'];return opts;}
@@ -45,7 +45,7 @@
   if(cat.value!=='Elektroniikka'||sub.value!=='Puhelimet')return;
   const brand=wrap.querySelector('[data-extra="brand"]'), current=wrap.querySelector('[data-extra="model"]'); if(!brand||!current)return;
   const makeModel=()=>{
-   const models=phoneModels[brand.value]; const oldValue=current.value||'';
+   const models=phoneModels[brand.value];
    if(models){
     const sel=document.createElement('select');sel.dataset.extra='model';sel.innerHTML='<option value="">Valitse malli</option>'+models.map(x=>`<option>${x}</option>`).join('');current.replaceWith(sel);
    }else if(current.tagName!=='INPUT'){
