@@ -23,7 +23,14 @@
     <span class="eyebrow">MARKKINAPAIKKA SUOMESSA</span>
     <h1 id="headline">Kaikki mitä etsit, yhdestä paikasta.</h1>
     <p id="sub">Osta ja myy tavaroita sekä löydä koteja myyntiin ja vuokralle.</p>
-    <div class="search"><input id="q" placeholder="Mitä etsit?"><select id="city"><option>Kaikki Suomi</option><option>Lahti</option><option>Helsinki</option><option>Espoo</option><option>Vantaa</option><option>Tampere</option></select><button id="searchBtn">Hae</button></div>
+    <div class="search">
+      <input id="q" placeholder="Mitä etsit?">
+      <input id="city" list="citySuggestions" placeholder="Kaikki Suomi / kaupunki" autocomplete="off">
+      <datalist id="citySuggestions">
+        <option value="Helsinki"><option value="Espoo"><option value="Tampere"><option value="Vantaa"><option value="Oulu"><option value="Turku"><option value="Jyväskylä"><option value="Kuopio"><option value="Lahti"><option value="Pori"><option value="Kouvola"><option value="Joensuu"><option value="Lappeenranta"><option value="Hämeenlinna"><option value="Vaasa"><option value="Seinäjoki"><option value="Rovaniemi"><option value="Mikkeli"><option value="Kotka"><option value="Salo">
+      </datalist>
+      <button id="searchBtn">Hae</button>
+    </div>
   </section>
   <section><div class="section-title"><h2 id="catTitle">Kategoriat</h2></div><div class="categories">
     <button data-cat="Autot">🚗<span>Autot</span></button><button data-cat="Koti">🛋️<span>Koti & huonekalut</span></button><button data-cat="Elektroniikka">📱<span>Elektroniikka</span></button><button data-cat="Vaatteet">👕<span>Vaatteet</span></button><button data-cat="Työt">💼<span>Työt</span></button><button data-cat="Palvelut">🧰<span>Palvelut</span></button><button data-cat="Asunnot">🏠<span>Asunnot</span></button>
@@ -39,7 +46,7 @@
     <form id="form">
       <label>Otsikko<input required id="title" maxlength="80" placeholder="Esim. iPhone 15 Pro 256GB"></label>
       <div class="form-row"><label>Hinta (€)<input required type="number" min="0" id="price" placeholder="0"></label><label>Kunto<select id="condition"><option>Hyvä</option><option>Uudenveroinen</option><option>Tyydyttävä</option><option>Uusi</option></select></label></div>
-      <div class="form-row"><label>Kaupunki<input required id="place" value="Lahti"></label><label>Kategoria<select id="category"><option>Elektroniikka</option><option>Koti</option><option>Autot</option><option>Vaatteet</option><option>Työt</option><option>Palvelut</option><option>Asunnot</option></select></label></div>
+      <div class="form-row"><label>Kaupunki<input required id="place" value="Lahti" placeholder="Kirjoita mikä tahansa kunta tai kaupunki"></label><label>Kategoria<select id="category"><option>Elektroniikka</option><option>Koti</option><option>Autot</option><option>Vaatteet</option><option>Työt</option><option>Palvelut</option><option>Asunnot</option></select></label></div>
       <label>Kuva<input id="photos" type="file" accept="image/*"><span class="input-help">Yksi kuva, enintään noin 1 MB tässä MVP-versiossa.</span></label>
       <div id="photoPreview" class="photo-preview" hidden></div>
       <label>Kuvaus<textarea id="desc" maxlength="1000" placeholder="Kerro tuotteesta, noudosta ja muista tärkeistä tiedoista."></textarea></label>
