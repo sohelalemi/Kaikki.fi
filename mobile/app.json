@@ -8,15 +8,14 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "fi.kaikki.app"
+      "bundleIdentifier": "fi.kaikki.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Kaikki.fi tarvitsee kuvakirjaston käyttöoikeuden ilmoitus- ja profiilikuvien valintaan.",
+        "NSLocationWhenInUseUsageDescription": "Kaikki.fi käyttää sijaintiasi ilmoituksen tarkan sijainnin valintaan."
+      }
     },
-    "android": {
-      "package": "fi.kaikki.app"
-    },
-    "plugins": [
-      "expo-notifications",
-      "expo-image-picker",
-      "expo-location"
-    ]
+    "android": {"package": "fi.kaikki.app"},
+    "plugins": ["expo-notifications","expo-image-picker","expo-location"]
   }
 }
