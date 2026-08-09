@@ -2,10 +2,21 @@
   "expo": {
     "name": "Kaikki.fi",
     "slug": "kaikki-fi",
-    "version": "0.1.0",
+    "version": "0.5.0",
     "orientation": "portrait",
+    "scheme": "kaikki",
     "userInterfaceStyle": "automatic",
-    "ios": {"supportsTablet": true, "bundleIdentifier": "fi.kaikki.app"},
-    "android": {"package": "fi.kaikki.app"}
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "fi.kaikki.app"
+    },
+    "android": {
+      "package": "fi.kaikki.app"
+    },
+    "plugins": [
+      "expo-notifications",
+      "expo-image-picker",
+      "expo-location"
+    ]
   }
 }
