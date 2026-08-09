@@ -9,6 +9,14 @@ export async function pickImage({allowsEditing=false}={}){
   return result.assets?.[0]||null;
 }
 
+export async function pickListingImages(limit=8){
+  const permission=await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if(!permission.granted)throw new Error('Salli kuvien käyttö asetuksista.');
+  const result=await ImagePicker.launchImageLibraryAsync({mediaTypes:['images'],allowsMultipleSelection:true,selectionLimit:limit,quality:0.82});
+  if(result.canceled)return [];
+  return (result.assets||[]).slice(0,limit);
+}
+
 async function uploadUri(bucket,path,asset){
   const response=await fetch(asset.uri);
   const blob=await response.blob();
@@ -27,4 +35,8 @@ export async function uploadAvatar(userId,asset){
 export async function uploadListingImage(userId,asset,index=0){
   const ext=(asset.fileName||`photo-${index}.jpg`).split('.').pop()?.toLowerCase()||'jpg';
   return uploadUri('listing-images',`${userId}/${Date.now()}-${index}.${ext}`,asset);
+}
+
+export async function uploadListingImages(userId,assets=[]){
+  return Promise.all(assets.map((asset,index)=>uploadListingImage(userId,asset,index)));
 }
