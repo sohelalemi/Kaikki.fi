@@ -13,7 +13,14 @@
   async signOut(){if(client)await client.auth.signOut()},
   async updateProfile(data){if(!client)throw new Error('Backend ei ole vielä yhdistetty.');const {data:res,error}=await client.auth.updateUser({data});if(error)throw error;return res.user},
   async loadListings(){if(!client)return null;const {data,error}=await client.from('listings').select('*').order('created_at',{ascending:false});if(error)throw error;return data},
-  async createListing(listing){if(!client)throw new Error('Backend ei ole vielä yhdistetty.');const session=await this.session();if(!session)throw new Error('Kirjaudu ensin.');const photos=Array.isArray(listing.imageUrls)&&listing.imageUrls.length?listing.imageUrls:(Array.isArray(listing.photos)?listing.photos:(listing.photo?[listing.photo]:[]));const row={user_id:session.user.id,title:listing.t,price:listing.p,category:listing.c,city:listing.city,address:listing.address||'',description:listing.desc||'',condition:listing.condition||'',housing_type:listing.housingType||'',extra:listing.extra||{},image_urls:photos};const {data,error}=await client.from('listings').insert(row).select().single();if(error)throw error;return data},
+  async createListing(listing){
+   if(!client)throw new Error('Backend ei ole vielä yhdistetty.');
+   const session=await this.session();if(!session)throw new Error('Kirjaudu ensin.');
+   const photos=Array.isArray(listing.imageUrls)&&listing.imageUrls.length?listing.imageUrls:(Array.isArray(listing.photos)?listing.photos:(listing.photo?[listing.photo]:[]));
+   const extra={...(listing.extra||{}),contact:listing.contact||'',amenities:Array.isArray(listing.amenities)?listing.amenities:[]};
+   const row={user_id:session.user.id,title:listing.t,price:listing.p,category:listing.c,city:listing.city,address:listing.address||'',description:listing.desc||'',condition:listing.condition||'',housing_type:listing.housingType||'',extra,image_urls:photos};
+   const {data,error}=await client.from('listings').insert(row).select().single();if(error)throw error;return data
+  },
   async updateListingImages(id,imageUrls){if(!client)throw new Error('Backend ei ole vielä yhdistetty.');const {data,error}=await client.from('listings').update({image_urls:Array.isArray(imageUrls)?imageUrls:[]}).eq('id',id).select().single();if(error)throw error;return data},
   async myListings(){if(!client)return [];const session=await this.session();if(!session)return [];const {data,error}=await client.from('listings').select('*').eq('user_id',session.user.id).order('created_at',{ascending:false});if(error)throw error;return data},
   async deleteListing(id){if(!client)throw new Error('Backend ei ole vielä yhdistetty.');const {error}=await client.from('listings').delete().eq('id',id);if(error)throw error}
