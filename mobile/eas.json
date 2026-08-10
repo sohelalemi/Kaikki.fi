@@ -4,14 +4,17 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "node": "22.14.0",
       "env": {"EAS_NO_FROZEN_LOCKFILE": "1"}
     },
     "preview": {
       "distribution": "internal",
+      "node": "22.14.0",
       "env": {"EAS_NO_FROZEN_LOCKFILE": "1"}
     },
     "production": {
       "autoIncrement": true,
+      "node": "22.14.0",
       "env": {"EAS_NO_FROZEN_LOCKFILE": "1"}
     }
   },
