@@ -9,10 +9,11 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "doctor": "npx expo-doctor",
-    "check": "npx expo-doctor && npx expo export --platform ios --output-dir dist-ios",
-    "build:ios:preview": "npx eas-cli build --platform ios --profile preview",
-    "build:ios:production": "npx eas-cli build --platform ios --profile production",
-    "submit:ios": "npx eas-cli submit --platform ios --latest"
+    "preflight:ios": "node scripts/preflight.js",
+    "check": "npm run preflight:ios && npx expo-doctor && npx expo export --platform ios --output-dir dist-ios",
+    "build:ios:preview": "npm run preflight:ios && npx eas-cli build --platform ios --profile preview",
+    "build:ios:production": "npm run preflight:ios && npx eas-cli build --platform ios --profile production",
+    "submit:ios": "npm run preflight:ios && npx eas-cli submit --platform ios --latest"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.24.0",
