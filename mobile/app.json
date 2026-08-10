@@ -6,6 +6,11 @@
     "orientation": "portrait",
     "scheme": "kaikki",
     "userInterfaceStyle": "automatic",
+    "extra": {
+      "eas": {
+        "projectId": "9170cf8d-c356-4fd8-9f5b-a8c944543bea"
+      }
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "fi.kaikki.app",
