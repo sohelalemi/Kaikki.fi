@@ -5,39 +5,39 @@
   if (!categorySelect || !form) return;
 
   const carModels = {
-    'Audi':['A1','A3','A4','A5','A6','A7','A8','Q2','Q3','Q4 e-tron','Q5','Q7','Q8','e-tron','TT'],
-    'BMW':['1-sarja','2-sarja','3-sarja','4-sarja','5-sarja','6-sarja','7-sarja','X1','X2','X3','X4','X5','X6','X7','i3','i4','i5','i7','iX'],
-    'Chevrolet':['Aveo','Camaro','Captiva','Corvette','Cruze','Orlando','Spark','Trax'],
-    'Citroën':['C1','C2','C3','C4','C5','C5 Aircross','Berlingo','Jumpy','Jumper'],
-    'Dacia':['Duster','Jogger','Logan','Sandero','Spring'],
-    'Fiat':['500','500X','Panda','Punto','Tipo','Doblo','Ducato'],
-    'Ford':['Fiesta','Focus','Mondeo','Mustang','Puma','Kuga','S-Max','Galaxy','Ranger','Transit'],
-    'Honda':['Accord','Civic','CR-V','HR-V','Jazz','e','ZR-V'],
-    'Hyundai':['i10','i20','i30','i40','Ioniq','Ioniq 5','Ioniq 6','Kona','Santa Fe','Tucson'],
+    'Audi':['A1','A2','A3','A4','A5','A6','A6 e-tron','A7','A8','Q2','Q3','Q4 e-tron','Q5','Q6 e-tron','Q7','Q8','Q8 e-tron','e-tron','e-tron GT','TT','R8'],
+    'BMW':['1-sarja','2-sarja','3-sarja','4-sarja','5-sarja','6-sarja','7-sarja','8-sarja','X1','X2','X3','X4','X5','X6','X7','XM','Z4','i3','i4','i5','i7','i8','iX','iX1','iX2','iX3'],
+    'Chevrolet':['Aveo','Camaro','Captiva','Corvette','Cruze','Malibu','Orlando','Spark','Trax','Volt'],
+    'Citroën':['C1','C2','C3','C3 Aircross','C4','C4 X','C5','C5 Aircross','Berlingo','Jumpy','Jumper'],
+    'Dacia':['Bigster','Duster','Jogger','Logan','Sandero','Spring'],
+    'Fiat':['500','500e','500L','500X','600','Panda','Punto','Tipo','Doblo','Ducato','Scudo'],
+    'Ford':['Fiesta','Focus','Mondeo','Mustang','Mustang Mach-E','Puma','Kuga','S-Max','Galaxy','Explorer','Ranger','Transit','Transit Custom','Tourneo Custom'],
+    'Honda':['Accord','Civic','CR-V','HR-V','Jazz','e','e:Ny1','ZR-V'],
+    'Hyundai':['i10','i20','i30','i40','Ioniq','Ioniq 5','Ioniq 6','Ioniq 9','Inster','Kona','Santa Fe','Tucson'],
     'Jaguar':['E-Pace','F-Pace','F-Type','I-Pace','XE','XF','XJ'],
     'Jeep':['Avenger','Cherokee','Compass','Grand Cherokee','Renegade','Wrangler'],
-    'Kia':['Ceed','Niro','Picanto','Rio','Sorento','Soul','Sportage','Stonic','EV3','EV6','EV9'],
+    'Kia':['Ceed','XCeed','Niro','Picanto','Rio','Sorento','Soul','Sportage','Stonic','EV3','EV4','EV5','EV6','EV9'],
     'Land Rover':['Defender','Discovery','Discovery Sport','Range Rover','Range Rover Evoque','Range Rover Sport','Range Rover Velar'],
-    'Lexus':['CT','ES','GS','IS','LBX','NX','RX','RZ','UX'],
-    'Mazda':['2','3','6','CX-3','CX-30','CX-5','CX-60','MX-5','MX-30'],
-    'Mercedes-Benz':['A-sarja','B-sarja','C-sarja','E-sarja','S-sarja','CLA','CLS','GLA','GLB','GLC','GLE','GLS','EQA','EQB','EQC','EQE','EQS','Vito','Sprinter'],
-    'Mini':['Cooper','Clubman','Countryman','Paceman'],
+    'Lexus':['CT','ES','GS','IS','LBX','NX','RC','RX','RZ','UX'],
+    'Mazda':['2','3','6','CX-3','CX-30','CX-5','CX-60','CX-80','MX-5','MX-30'],
+    'Mercedes-Benz':['A-sarja','B-sarja','C-sarja','E-sarja','S-sarja','CLA','CLE','CLS','GLA','GLB','GLC','GLE','GLS','G-sarja','EQA','EQB','EQC','EQE','EQS','EQV','Vito','V-sarja','Sprinter'],
+    'Mini':['Cooper','Aceman','Clubman','Countryman','Paceman'],
     'Mitsubishi':['ASX','Colt','Eclipse Cross','L200','Outlander','Space Star'],
-    'Nissan':['Almera','Juke','Leaf','Micra','Note','Qashqai','X-Trail','Ariya','Primastar'],
-    'Opel':['Astra','Corsa','Insignia','Mokka','Grandland','Crossland','Combo','Vivaro','Zafira'],
-    'Peugeot':['107','108','206','207','208','2008','307','308','3008','407','508','5008','Partner','Expert','Boxer'],
-    'Polestar':['1','2','3','4'],
+    'Nissan':['Almera','Juke','Leaf','Micra','Note','Qashqai','X-Trail','Ariya','Townstar','Primastar','Interstar'],
+    'Opel':['Astra','Corsa','Insignia','Mokka','Grandland','Crossland','Combo','Frontera','Vivaro','Zafira'],
+    'Peugeot':['107','108','206','207','208','2008','307','308','3008','407','408','508','5008','Partner','Rifter','Expert','Boxer'],
+    'Polestar':['1','2','3','4','5'],
     'Porsche':['718','911','Cayenne','Macan','Panamera','Taycan'],
-    'Renault':['Captur','Clio','Kadjar','Kangoo','Megane','Scenic','Talisman','Trafic','Master','Zoe'],
+    'Renault':['Captur','Clio','Kadjar','Kangoo','Megane','Megane E-Tech','Rafale','Scenic','Scenic E-Tech','Symbioz','Talisman','Trafic','Master','Zoe'],
     'Saab':['9-3','9-5','900','9000'],
     'Seat':['Arona','Ateca','Ibiza','Leon','Tarraco'],
-    'Škoda':['Citigo','Fabia','Kamiq','Karoq','Kodiaq','Octavia','Rapid','Scala','Superb','Enyaq'],
-    'Subaru':['BRZ','Forester','Impreza','Legacy','Outback','Solterra','XV'],
+    'Škoda':['Citigo','Fabia','Kamiq','Karoq','Kodiaq','Octavia','Rapid','Scala','Superb','Enyaq','Elroq'],
+    'Subaru':['BRZ','Forester','Impreza','Legacy','Outback','Solterra','XV','Crosstrek'],
     'Suzuki':['Across','Ignis','Jimny','S-Cross','Swift','Vitara'],
     'Tesla':['Model 3','Model S','Model X','Model Y'],
-    'Toyota':['Auris','Avensis','Aygo','bZ4X','C-HR','Camry','Corolla','Highlander','Hilux','Land Cruiser','Prius','Proace','RAV4','Yaris','Yaris Cross'],
-    'Volkswagen':['Arteon','Caddy','Crafter','Golf','ID.3','ID.4','ID.5','ID.7','Passat','Polo','T-Cross','T-Roc','Tiguan','Touareg','Touran','Transporter','Up!'],
-    'Volvo':['C30','C40','EX30','EX40','EX90','S40','S60','S80','S90','V40','V50','V60','V70','V90','XC40','XC60','XC70','XC90'],
+    'Toyota':['Auris','Avensis','Aygo','Aygo X','bZ4X','C-HR','Camry','Corolla','Corolla Cross','Highlander','Hilux','Land Cruiser','Prius','Proace','Proace City','RAV4','Supra','Yaris','Yaris Cross','GR Yaris'],
+    'Volkswagen':['Arteon','Caddy','Crafter','Golf','ID.3','ID.4','ID.5','ID.7','ID. Buzz','Passat','Polo','T-Cross','T-Roc','Taigo','Tiguan','Touareg','Touran','Transporter','Up!'],
+    'Volvo':['C30','C40','EC40','EX30','EX40','EX90','ES90','S40','S60','S80','S90','V40','V50','V60','V70','V90','XC40','XC60','XC70','XC90'],
     'Muu':[]
   };
 
@@ -54,8 +54,8 @@
       <label>Ajettu (km)<input id="carMileage" type="number" min="0" step="1" placeholder="Esim. 85000"></label>
     </div>
     <div class="form-row">
-      <label>Polttoaine<select id="carFuel"><option value="">Valitse</option><option>Bensiini</option><option>Diesel</option><option>Hybridi</option><option>Lataushybridi</option><option>Sähkö</option><option>Kaasu</option><option>Muu</option></select></label>
-      <label>Vaihteisto<select id="carTransmission"><option value="">Valitse</option><option>Automaatti</option><option>Manuaali</option></select></label>
+      <label>Polttoaine<select id="carFuel"><option value="">Valitse</option><option>Bensiini</option><option>Diesel</option><option>Hybridi</option><option>Lataushybridi</option><option>Sähkö</option><option>Kaasu</option><option>Etanoli (E85)</option><option>Vety</option><option>Muu</option></select></label>
+      <label>Vaihteisto<select id="carTransmission"><option value="">Valitse</option><option>Automaatti</option><option>Manuaali</option><option>Puoliautomaatti</option><option>Muu</option></select></label>
     </div>`;
   if (housingWrap) housingWrap.insertAdjacentElement('afterend', wrap);
   else categorySelect.closest('.form-row')?.insertAdjacentElement('afterend', wrap);
