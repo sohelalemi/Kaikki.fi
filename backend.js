@@ -5,6 +5,22 @@
  const enabled=Boolean(url&&key&&window.supabase);
  const client=enabled?window.supabase.createClient(url,key):null;
  const emailRedirectTo='https://sohelalemi.github.io/Kaikki.fi/';
+ function extFromMime(type=''){return {'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[type]||'jpg'}
+ async function uploadDataUrlImages(list,session){
+  if(!client||!session||!Array.isArray(list)||!list.length)return Array.isArray(list)?list:[];
+  const out=[];
+  for(let i=0;i<list.length;i++){
+   const src=list[i];
+   if(typeof src!=='string'||!src.startsWith('data:image/')){out.push(src);continue}
+   const res=await fetch(src),blob=await res.blob();
+   if(blob.size>10*1024*1024)throw new Error('Yksi kuva on liian suuri (enintään 10 Mt).');
+   const ext=extFromMime(blob.type),path=`${session.user.id}/${Date.now()}-${i}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+   const {error}=await client.storage.from('listing-images').upload(path,blob,{contentType:blob.type||'image/jpeg',cacheControl:'3600',upsert:false});
+   if(error)throw error;
+   const {data}=client.storage.from('listing-images').getPublicUrl(path);out.push(data.publicUrl)
+  }
+  return out
+ }
  window.KaikkiBackend={
   enabled, client,
   async session(){if(!client)return null;const {data}=await client.auth.getSession();return data.session},
@@ -16,14 +32,18 @@
   async createListing(listing){
    if(!client)throw new Error('Backend ei ole vielä yhdistetty.');
    const session=await this.session();if(!session)throw new Error('Kirjaudu ensin.');
-   const photos=Array.isArray(listing.imageUrls)&&listing.imageUrls.length?listing.imageUrls:(Array.isArray(listing.photos)?listing.photos:(listing.photo?[listing.photo]:[]));
-   const extra={...(listing.extra||{}),contact:listing.contact||'',amenities:Array.isArray(listing.amenities)?listing.amenities:[]};
+   const rawPhotos=Array.isArray(listing.imageUrls)&&listing.imageUrls.length?listing.imageUrls:(Array.isArray(listing.photos)?listing.photos:(listing.photo?[listing.photo]:[]));
+   const photos=await uploadDataUrlImages(rawPhotos,session);
+   const extra={...(listing.extra||{}),vehicleExtra:{...(listing.vehicleExtra||{})},contact:listing.contact||'',amenities:Array.isArray(listing.amenities)?listing.amenities:[]};
    const row={user_id:session.user.id,title:listing.t,price:listing.p,category:listing.c,city:listing.city,address:listing.address||'',description:listing.desc||'',condition:listing.condition||'',housing_type:listing.housingType||'',extra,image_urls:photos};
    const {data,error}=await client.from('listings').insert(row).select().single();if(error)throw error;return data
   },
   async updateListingImages(id,imageUrls){if(!client)throw new Error('Backend ei ole vielä yhdistetty.');const {data,error}=await client.from('listings').update({image_urls:Array.isArray(imageUrls)?imageUrls:[]}).eq('id',id).select().single();if(error)throw error;return data},
   async myListings(){if(!client)return [];const session=await this.session();if(!session)return [];const {data,error}=await client.from('listings').select('*').eq('user_id',session.user.id).order('created_at',{ascending:false});if(error)throw error;return data},
   async deleteListing(id){if(!client)throw new Error('Backend ei ole vielä yhdistetty.');const {error}=await client.from('listings').delete().eq('id',id);if(error)throw error},
+  async favorites(){if(!client)return [];const session=await this.session();if(!session)return [];const {data,error}=await client.from('favorites').select('listing_id').eq('user_id',session.user.id);if(error)throw error;return (data||[]).map(x=>String(x.listing_id))},
+  async addFavorite(listingId){if(!client)return;const session=await this.session();if(!session)throw new Error('Kirjaudu ensin.');const id=Number(listingId);if(!Number.isFinite(id))return;const {error}=await client.from('favorites').upsert({user_id:session.user.id,listing_id:id},{onConflict:'user_id,listing_id'});if(error)throw error},
+  async removeFavorite(listingId){if(!client)return;const session=await this.session();if(!session)return;const id=Number(listingId);if(!Number.isFinite(id))return;const {error}=await client.from('favorites').delete().eq('user_id',session.user.id).eq('listing_id',id);if(error)throw error},
   async notifications(){if(!client)return [];const session=await this.session();if(!session)return [];const {data,error}=await client.from('notifications').select('*').eq('user_id',session.user.id).order('created_at',{ascending:false}).limit(50);if(error)throw error;return data||[]},
   async unreadNotificationCount(){if(!client)return 0;const session=await this.session();if(!session)return 0;const {count,error}=await client.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',session.user.id).eq('is_read',false);if(error)throw error;return count||0},
   async markNotificationRead(id){if(!client)return;const {error}=await client.from('notifications').update({is_read:true}).eq('id',id);if(error)throw error},
