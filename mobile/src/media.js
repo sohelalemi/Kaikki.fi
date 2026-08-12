@@ -19,9 +19,9 @@ export async function pickListingImages(limit=8){
 
 async function uploadUri(bucket,path,asset){
   const response=await fetch(asset.uri);
-  const blob=await response.blob();
+  const arrayBuffer=await response.arrayBuffer();
   const contentType=asset.mimeType||'image/jpeg';
-  const {error}=await supabase.storage.from(bucket).upload(path,blob,{upsert:true,contentType,cacheControl:'3600'});
+  const {error}=await supabase.storage.from(bucket).upload(path,arrayBuffer,{contentType,cacheControl:'3600'});
   if(error)throw error;
   const {data}=supabase.storage.from(bucket).getPublicUrl(path);
   return `${data.publicUrl}?v=${Date.now()}`;
@@ -29,7 +29,7 @@ async function uploadUri(bucket,path,asset){
 
 export async function uploadAvatar(userId,asset){
   const ext=(asset.fileName||'avatar.jpg').split('.').pop()?.toLowerCase()||'jpg';
-  return uploadUri('Avatars',`${userId}/avatar.${ext}`,asset);
+  return uploadUri('Avatars',`${userId}/${Date.now()}-avatar.${ext}`,asset);
 }
 
 export async function uploadListingImage(userId,asset,index=0){
