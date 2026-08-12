@@ -29,7 +29,7 @@ async function uploadUri(bucket,path,asset){
 
 export async function uploadAvatar(userId,asset){
   const ext=(asset.fileName||'avatar.jpg').split('.').pop()?.toLowerCase()||'jpg';
-  return uploadUri('avatars',`${userId}/avatar.${ext}`,asset);
+  return uploadUri('Avatars',`${userId}/avatar.${ext}`,asset);
 }
 
 export async function uploadListingImage(userId,asset,index=0){
