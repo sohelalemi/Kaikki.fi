@@ -7,13 +7,13 @@ import{pickImage,pickListingImages,uploadAvatar,uploadListingImages}from'./src/m
 const categories=['Kaikki','Autot','Asunnot','Elektroniikka','Koti','Vaatteet','Työt','Palvelut'];
 const sellCategories=categories.filter(x=>x!=='Kaikki');
 const categoryFieldConfig={
- Autot:[['brand','Merkki'],['model','Malli'],['year','Vuosimalli'],['mileage','Kilometrit'],['condition','Kunto']],
- Asunnot:[['listing_type','Myynti / Vuokra'],['area','Pinta-ala m²'],['rooms','Huoneet'],['housing_type','Asuntotyyppi']],
- Elektroniikka:[['brand','Merkki'],['model','Malli'],['condition','Kunto']],
- Koti:[['type','Tyyppi'],['color','Väri'],['condition','Kunto']],
- Vaatteet:[['type','Tyyppi'],['size','Koko'],['color','Väri'],['condition','Kunto']],
- Työt:[['job_type','Työn tyyppi'],['compensation','Palkka / korvaus']],
- Palvelut:[['service_type','Palvelun tyyppi'],['rate','Hinta / tunti']]
+ Autot:[['brand','Merkki'],['model','Malli'],['year','Vuosimalli'],['mileage','Kilometrit'],['fuel','Polttoaine'],['transmission','Vaihteisto'],['condition','Kunto']],
+ Asunnot:[['listing_type','Myynti / Vuokra'],['area','Pinta-ala m²'],['rooms','Huoneet'],['housing_type','Asuntotyyppi'],['address','Osoite']],
+ Elektroniikka:[['type','Tyyppi'],['brand','Merkki'],['model','Malli'],['condition','Kunto']],
+ Koti:[['type','Tyyppi'],['color','Väri'],['material','Materiaali'],['condition','Kunto']],
+ Vaatteet:[['type','Tyyppi'],['size','Koko'],['color','Väri'],['brand','Merkki'],['condition','Kunto']],
+ Työt:[['job_type','Työn tyyppi'],['company','Yritys'],['compensation','Palkka / korvaus']],
+ Palvelut:[['service_type','Palvelun tyyppi'],['rate','Hinta / tunti'],['service_area','Palvelualue']]
 };
 
 export default function App(){
