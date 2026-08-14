@@ -24,9 +24,11 @@ const electronicsCatalog={
  'Älykello':{Apple:['Apple Watch SE','Apple Watch Series 9','Apple Watch Series 10','Apple Watch Ultra 2'],Samsung:['Galaxy Watch6','Galaxy Watch7','Galaxy Watch Ultra'],Garmin:['Forerunner','Fenix','Venu'],Huawei:['Watch GT 4','Watch GT 5']},
  Kodinkone:{Bosch:['Pesukone','Astianpesukone','Jääkaappi','Uuni'],Samsung:['Pesukone','Kuivausrumpu','Jääkaappi','Mikroaaltouuni'],LG:['Pesukone','Kuivausrumpu','Jääkaappi'],Electrolux:['Pesukone','Astianpesukone','Uuni'],Miele:['Pesukone','Kuivausrumpu','Astianpesukone'],Siemens:['Astianpesukone','Uuni','Jääkaappi']}
 };
+const electronicsStorage=['16 GB','32 GB','64 GB','128 GB','256 GB','512 GB','1 TB','2 TB','Muu'];
+const electronicsAccessories=['Ei lisävarusteita','Laturi','Laatikko','Kuitti / takuu','Suojakuori','Useita lisävarusteita'];
 const categoryOptions={
  Asunnot:{listing_type:['Myynti','Vuokra'],housing_type:['Kerrostalo','Rivitalo','Omakotitalo','Paritalo','Erillistalo','Mökki / vapaa-ajan asunto','Tontti','Autotalli','Muu'],rooms:['1h','2h','3h','4h','5h','6h+'],floor:['1','2','3','4','5','6','7','8+','Ei kerrosta'],condition:housingConditionOptions,sauna:['Kyllä','Ei'],balcony:['Kyllä','Ei']},
- Elektroniikka:{type:Object.keys(electronicsCatalog),condition:conditionOptions},
+ Elektroniikka:{type:Object.keys(electronicsCatalog),storage:electronicsStorage,color:colorOptions,accessories:electronicsAccessories,condition:conditionOptions},
  Koti:{type:['Sohva','Nojatuoli','Sänky','Patja','Pöytä','Tuoli','Kaappi','Hylly','Lipasto','Matto','Valaisin','Peili','Keittiökaluste','Kodinkone','Sisustus','Puutarha','Työkalu','Muu'],color:colorOptions,material:materialOptions,condition:conditionOptions},
  Vaatteet:{type:['T-paita','Paita','Pusero','Huppari','Neule','Takki','Housut','Farkut','Shortsit','Mekko','Hame','Alusvaatteet','Rintaliivit','Sukat','Yöasu','Urheiluvaatteet','Uima-asu','Kengät','Laukku','Hattu','Asusteet','Lastenvaatteet','Muu'],gender:['Naiset','Miehet','Lapset','Unisex'],size:['XXS','XS','S','M','L','XL','XXL','XXXL','32','34','36','38','40','42','44','46','48','50','52','54','Muu'],color:colorOptions,condition:conditionOptions},
  Työt:{job_type:['Kokoaikainen','Osa-aikainen','Keikkatyö','Määräaikainen','Vakituinen','Harjoittelu','Kesätyö','Freelance'],industry:['Rakennus','Kuljetus','Ravintola','Siivous','Hoiva','Myynti','Varasto','IT','Toimisto','Teollisuus','Turvallisuus','Muu'],work_mode:['Paikan päällä','Etätyö','Hybridi']},
@@ -35,7 +37,7 @@ const categoryOptions={
 const categoryFieldConfig={
  Autot:[['brand','Merkki'],['model','Malli'],['year','Vuosimalli'],['mileage','Kilometrit'],['fuel','Polttoaine'],['transmission','Vaihteisto'],['condition','Kunto'],['address','Osoite']],
  Asunnot:[['listing_type','Myynti / Vuokra'],['housing_type','Asuntotyyppi'],['area','Pinta-ala m²'],['rooms','Huoneet'],['build_year','Rakennusvuosi'],['floor','Kerros'],['condition','Kunto'],['sauna','Sauna'],['balcony','Parveke'],['address','Osoite']],
- Elektroniikka:[['type','Tyyppi'],['brand','Merkki'],['model','Malli'],['condition','Kunto'],['address','Osoite']],
+ Elektroniikka:[['type','Tyyppi'],['brand','Merkki'],['model','Malli'],['storage','Tallennustila'],['color','Väri'],['battery_health','Akun kunto %'],['screen_size','Näytön koko tuumaa'],['accessories','Mukana'],['condition','Kunto'],['address','Osoite']],
  Koti:[['type','Tyyppi'],['color','Väri'],['material','Materiaali'],['condition','Kunto'],['address','Osoite']],
  Vaatteet:[['type','Tyyppi'],['gender','Kenelle'],['size','Koko'],['color','Väri'],['brand','Merkki'],['condition','Kunto'],['address','Osoite']],
  Työt:[['job_type','Työn tyyppi'],['industry','Ala'],['work_mode','Työtapa'],['company','Yritys'],['compensation','Palkka / korvaus'],['address','Osoite']],
@@ -84,11 +86,14 @@ export default function App(){
   if(categoryName==='Autot'&&key==='transmission')return <View key={key}>{choiceField(label,transmissionOptions,values?.transmission||'',v=>setValues(x=>({...x,transmission:v})))}</View>;
   if(categoryName==='Autot'&&key==='condition')return <View key={key}>{choiceField(label,conditionOptions,values?.condition||'',v=>setValues(x=>({...x,condition:v})))}</View>;
   if(categoryName==='Asunnot'&&key==='build_year')return <View key={key}>{choiceField(label,buildYears,values?.build_year||'',v=>setValues(x=>({...x,build_year:v})))}</View>;
-  if(categoryName==='Elektroniikka'&&key==='type')return <View key={key}>{choiceField(label,Object.keys(electronicsCatalog),values?.type||'',v=>setValues(x=>({...x,type:v,brand:'',model:''})))}</View>;
+  if(categoryName==='Elektroniikka'&&key==='type')return <View key={key}>{choiceField(label,Object.keys(electronicsCatalog),values?.type||'',v=>setValues(x=>({...x,type:v,brand:'',model:'',storage:'',battery_health:'',screen_size:''})))}</View>;
   if(categoryName==='Elektroniikka'&&key==='brand'){const brands=Object.keys(electronicsCatalog[values?.type]||{});return <View key={key}>{values?.type?choiceField(label,brands,values?.brand||'',v=>setValues(x=>({...x,brand:v,model:''}))):<Text style={s.helpText}>Valitse ensin tyyppi</Text>}</View>}
   if(categoryName==='Elektroniikka'&&key==='model'){const models=electronicsCatalog[values?.type]?.[values?.brand]||[];return <View key={key}>{values?.brand?choiceField(label,models,values?.model||'',v=>setValues(x=>({...x,model:v}))):<Text style={s.helpText}>Valitse ensin merkki</Text>}<TextInput style={s.input} value={models.includes(values?.model)?'':String(values?.model||'')} onChangeText={v=>setValues(x=>({...x,model:v}))} placeholder="Muu malli"/></View>}
+  if(categoryName==='Elektroniikka'&&key==='storage'&&!['Puhelin','Tabletti','Tietokone','Pelikonsoli','Älykello'].includes(values?.type))return null;
+  if(categoryName==='Elektroniikka'&&key==='battery_health'&&!['Puhelin','Tabletti','Älykello'].includes(values?.type))return null;
+  if(categoryName==='Elektroniikka'&&key==='screen_size'&&!['Puhelin','Tabletti','Tietokone','TV'].includes(values?.type))return null;
   const options=categoryOptions[categoryName]?.[key];if(options)return <View key={key}>{choiceField(label,options,values?.[key]||'',v=>setValues(x=>({...x,[key]:v})))}</View>;
-  const numeric=['mileage','area','rate','compensation'].includes(key);return <TextInput key={key} style={s.input} value={String(values?.[key]??'')} onChangeText={v=>setValues(x=>({...x,[key]:v}))} keyboardType={numeric?'numeric':'default'} placeholder={label}/>
+  const numeric=['mileage','area','rate','compensation','battery_health','screen_size'].includes(key);return <TextInput key={key} style={s.input} value={String(values?.[key]??'')} onChangeText={v=>setValues(x=>({...x,[key]:v}))} keyboardType={numeric?'numeric':'default'} placeholder={label}/>
  })}
  function extraDetailRows(item){return Object.entries(item.extra||{}).filter(([,v])=>String(v||'').trim()).map(([k,v])=>{const label=(categoryFieldConfig[item.category]||[]).find(([key])=>key===k)?.[1]||k;return <View key={k} style={s.detailRow}><Text style={s.detailLabel}>{label}</Text><Text style={s.detailValue}>{String(v)}</Text></View>})}
  const filtered=useMemo(()=>{const q=query.trim().toLowerCase();return listings.filter(x=>{if(category!=='Kaikki'&&x.category!==category)return false;if(!q)return true;const hay=[x.title,x.city,x.description,x.address,...Object.values(x.extra||{})].map(v=>String(v||'').toLowerCase()).join(' ');return hay.includes(q)})},[listings,query,category]);
