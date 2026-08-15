@@ -7,6 +7,17 @@
  let panel,btn,badge;
  function fmtTime(v){try{return new Intl.DateTimeFormat('fi-FI',{dateStyle:'short',timeStyle:'short'}).format(new Date(v))}catch{return ''}}
  async function refreshBadge(){try{const n=await B.unreadNotificationCount();if(!badge)return;badge.textContent=n>99?'99+':String(n);badge.hidden=!n}catch{if(badge)badge.hidden=true}}
+ function openMessages(){
+  if(panel)panel.hidden=true;
+  if(location.hash!=='#messages')location.hash='messages';
+  document.querySelector('#login')?.click();
+  let tries=0;
+  const timer=setInterval(()=>{
+   const tab=document.querySelector('[data-account-tab="messages"]');
+   if(tab){clearInterval(timer);tab.click();return}
+   if(++tries>=20)clearInterval(timer);
+  },50);
+ }
  async function renderPanel(){
   if(!panel)return;panel.innerHTML='<div class="notify-empty">Ladataan...</div>';
   try{
@@ -19,7 +30,11 @@
     el.querySelector('.notify-title').textContent=n.title||'Ilmoitus';
     el.querySelector('.notify-body').textContent=n.body||'';
     el.querySelector('.notify-time').textContent=fmtTime(n.created_at);
-    el.onclick=async()=>{if(!n.is_read){await B.markNotificationRead(n.id);n.is_read=true;el.classList.remove('unread');await refreshBadge()}if(n.link)location.href=n.link};
+    el.onclick=async()=>{
+     if(!n.is_read){await B.markNotificationRead(n.id);n.is_read=true;el.classList.remove('unread');await refreshBadge()}
+     if(n.type==='message'||n.link==='#messages'){openMessages();return}
+     if(n.link)location.href=n.link;
+    };
     panel.appendChild(el);
    }
   }catch{panel.innerHTML='<div class="notify-empty">Ilmoituksia ei voitu ladata.</div>'}
