@@ -11,6 +11,9 @@
     "doctor": "npx expo-doctor",
     "preflight:ios": "node scripts/preflight.js",
     "check": "npm run preflight:ios && npx expo-doctor && npx expo export --platform ios --output-dir dist-ios",
+    "build:android:preview": "npx eas-cli build --platform android --profile preview",
+    "build:android:production": "npx eas-cli build --platform android --profile production",
+    "submit:android": "npx eas-cli submit --platform android --latest",
     "build:ios:preview": "npm run preflight:ios && npx eas-cli build --platform ios --profile preview",
     "build:ios:production": "npm run preflight:ios && npx eas-cli build --platform ios --profile production",
     "submit:ios": "npm run preflight:ios && npx eas-cli submit --platform ios --latest"
