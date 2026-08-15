@@ -1,0 +1,39 @@
+name: Show actions on all listing cards
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/show-actions-all-listings.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Keep Viesti and Varaa visible on every card
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('mobile/App.js')
+          s=p.read_text()
+          old="{item.user_id!==session.user.id?<View style={s.row}><Pressable style={s.secondary} onPress={()=>openChat(item)}><Text>💬 Viesti</Text></Pressable><Pressable style={s.primarySmall} onPress={()=>reserve(item)}><Text style={s.primaryText}>Varaa</Text></Pressable></View>:null}"
+          new="<View style={s.row}><Pressable style={s.secondary} onPress={()=>openChat(item)}><Text>💬 Viesti</Text></Pressable><Pressable style={s.primarySmall} onPress={()=>reserve(item)}><Text style={s.primaryText}>Varaa</Text></Pressable></View>"
+          if old not in s:
+              raise SystemExit('market card action block not found')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+      - name: Commit change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mobile/App.js
+          git rm .github/workflows/show-actions-all-listings.yml
+          git commit -m "Show message and reserve actions on all listing cards"
+          git push origin main
