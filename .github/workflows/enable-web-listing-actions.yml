@@ -1,0 +1,35 @@
+name: Enable web listing actions
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  enable:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add listing actions script to page
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          tag='<script src="listing-actions.js?v=20260815-1"></script>'
+          if tag not in s:
+              needle='<script src="messaging-ui.js?v=20260809-1"></script>'
+              if needle not in s:
+                  raise SystemExit('messaging-ui script tag not found')
+              s=s.replace(needle, needle+tag)
+              p.write_text(s)
+          PY
+      - name: Commit change
+        run: |
+          git config user.name "Kaikki.fi"
+          git config user.email "ayatalimi3366@gmail.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Show web message and reservation buttons"
+            git push
+          fi
