@@ -1,0 +1,44 @@
+name: Restore mobile quick actions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/restore-mobile-quick-actions.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Restore quick actions and account links
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('mobile/App.js')
+          s=p.read_text()
+          old="function marketCard(item){return <View style={s.marketCard}><Pressable onPress={()=>showListing(item)}>{item.image_urls?.[0]?<Image source={{uri:item.image_urls[0]}} style={s.marketImage}/>:<View style={s.marketImagePlaceholder}><Text style={{fontSize:38}}>📦</Text></View>}<View style={s.cardBadge}><Text style={s.cardBadgeText}>{categoryIcons[item.category]||'📦'} {item.category}</Text></View></Pressable><Pressable onPress={()=>toggleFavorite(item.id)} style={s.favoriteButton}><Text style={s.favoriteIcon}>{favoriteIds.includes(item.id)?'♥':'♡'}</Text></Pressable><Pressable onPress={()=>showListing(item)} style={s.marketBody}><Text numberOfLines={2} style={s.marketTitle}>{item.title}</Text><Text style={s.marketPrice}>{Number(item.price||0).toLocaleString('fi-FI')} €</Text><Text style={s.marketMeta}>📍 {item.city}{item.extra?.condition?` · ${item.extra.condition}`:''}</Text></Pressable></View>}"
+          new="function marketCard(item){return <View style={s.marketCard}><Pressable onPress={()=>showListing(item)}>{item.image_urls?.[0]?<Image source={{uri:item.image_urls[0]}} style={s.marketImage}/>:<View style={s.marketImagePlaceholder}><Text style={{fontSize:38}}>📦</Text></View>}<View style={s.cardBadge}><Text style={s.cardBadgeText}>{categoryIcons[item.category]||'📦'} {item.category}</Text></View></Pressable><Pressable onPress={()=>toggleFavorite(item.id)} style={s.favoriteButton}><Text style={s.favoriteIcon}>{favoriteIds.includes(item.id)?'♥':'♡'}</Text></Pressable><Pressable onPress={()=>showListing(item)} style={s.marketBody}><Text numberOfLines={2} style={s.marketTitle}>{item.title}</Text><Text style={s.marketPrice}>{Number(item.price||0).toLocaleString('fi-FI')} €</Text><Text style={s.marketMeta}>📍 {item.city}{item.extra?.condition?` · ${item.extra.condition}`:''}</Text>{item.user_id!==session.user.id?<View style={s.row}><Pressable style={s.secondary} onPress={()=>openChat(item)}><Text>💬 Viesti</Text></Pressable><Pressable style={s.primarySmall} onPress={()=>reserve(item)}><Text style={s.primaryText}>Varaa</Text></Pressable></View>:null}</Pressable></View>}"
+          if old not in s:
+              raise SystemExit('marketCard block not found')
+          s=s.replace(old,new,1)
+          old2="<Pressable style={s.secondaryWide} onPress={()=>setTab('reservations')}><Text>📦 Varaukset</Text></Pressable><Pressable style={s.danger}"
+          new2="<Pressable style={s.secondaryWide} onPress={()=>setTab('reservations')}><Text>📦 Varaukset</Text></Pressable><Pressable style={s.secondaryWide} onPress={()=>setTab('notifications')}><Text>🔔 Ilmoitukset</Text></Pressable><Pressable style={s.danger}"
+          if old2 not in s:
+              raise SystemExit('profile actions block not found')
+          s=s.replace(old2,new2,1)
+          p.write_text(s)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mobile/App.js
+          git rm .github/workflows/restore-mobile-quick-actions.yml
+          git commit -m "Restore mobile listing and account quick actions"
+          git push origin main
