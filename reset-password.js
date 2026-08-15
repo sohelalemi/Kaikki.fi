@@ -60,7 +60,7 @@
     status.style.color = '#15803d';
     status.textContent = 'Salasana vaihdettu. Voit nyt kirjautua uudella salasanalla.';
     save.textContent = 'Valmis';
-    history.replaceState({}, document.title, location.pathname + location.search);
+    history.replaceState({}, document.title, location.pathname);
     setTimeout(() => wrap.classList.remove('show'), 2200);
   }
 
@@ -70,6 +70,30 @@
     if (event === 'PASSWORD_RECOVERY') showReset();
   });
 
-  const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
-  if (hash.get('type') === 'recovery') showReset();
+  (async () => {
+    const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const query = new URLSearchParams(location.search);
+    const accessToken = hash.get('access_token');
+    const refreshToken = hash.get('refresh_token');
+    const recoveryType = hash.get('type');
+    const code = query.get('code');
+
+    try {
+      if (accessToken && refreshToken) {
+        const { error } = await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        if (!error && (recoveryType === 'recovery' || accessToken)) showReset();
+        return;
+      }
+
+      if (code) {
+        const { error } = await client.auth.exchangeCodeForSession(code);
+        if (!error) showReset();
+        return;
+      }
+
+      if (recoveryType === 'recovery') showReset();
+    } catch (e) {
+      console.warn('password recovery', e);
+    }
+  })();
 })();
