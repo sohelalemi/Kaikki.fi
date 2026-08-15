@@ -1,0 +1,44 @@
+name: Improve profile avatar
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/improve-profile-avatar.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Improve profile avatar UI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('mobile/App.js')
+          s = p.read_text()
+          old = "<Pressable onPress={chooseAvatar} style={{alignItems:'center'}}>{profileAvatar?<Image source={{uri:profileAvatar}} style={s.avatar}/>:null}<Text style={s.link}>Vaihda profiilikuva</Text></Pressable>"
+          new = "<Pressable onPress={chooseAvatar} style={s.avatarWrap}>{profileAvatar?<Image source={{uri:profileAvatar}} style={s.avatar}/>:<View style={s.avatarFallback}><Text style={s.avatarInitial}>{(profileName||session.user.email||'?').charAt(0).toUpperCase()}</Text></View>}<Text style={s.link}>{profileAvatar?'Vaihda profiilikuva':'Lisää profiilikuva'}</Text><Text style={s.avatarHint}>Napauta kuvaa vaihtaaksesi sen</Text></Pressable>"
+          if old not in s:
+              raise SystemExit('profile avatar block not found')
+          s = s.replace(old, new, 1)
+          old_style = "avatar:{width:104,height:104,borderRadius:52},danger:"
+          new_style = "avatarWrap:{alignItems:'center',gap:4,marginBottom:6},avatar:{width:104,height:104,borderRadius:52,backgroundColor:'#eef2f6'},avatarFallback:{width:104,height:104,borderRadius:52,backgroundColor:'#1565d8',alignItems:'center',justifyContent:'center'},avatarInitial:{fontSize:40,fontWeight:'900',color:'#fff'},avatarHint:{fontSize:12,color:'#64748b'},danger:"
+          if old_style not in s:
+              raise SystemExit('avatar style block not found')
+          s = s.replace(old_style, new_style, 1)
+          p.write_text(s)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mobile/App.js
+          git rm .github/workflows/improve-profile-avatar.yml
+          git commit -m "Improve mobile profile avatar"
+          git push origin main
