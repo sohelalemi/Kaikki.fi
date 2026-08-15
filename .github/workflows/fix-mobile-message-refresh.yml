@@ -1,0 +1,39 @@
+name: Fix mobile message refresh
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-mobile-message-refresh.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch mobile messages refresh
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('mobile/App.js')
+          s=p.read_text(encoding='utf-8')
+          old="useEffect(()=>{if(session&&tab==='myListings')loadMyListings()},[session,tab]);"
+          new=old+"\n useEffect(()=>{if(session&&tab==='messages')loadMessages()},[session,tab]);"
+          if "tab==='messages')loadMessages()" not in s:
+              if old not in s:
+                  raise SystemExit('message tab effect anchor not found')
+              s=s.replace(old,new,1)
+          old_nav="<Pressable onPress={()=>setTab('messages')}><Text style={tab==='messages'?s.navActive:s.nav}>💬 Viestit</Text></Pressable>"
+          new_nav="<Pressable onPress={()=>{loadMessages();setTab('messages')}}><Text style={tab==='messages'?s.navActive:s.nav}>💬 Viestit</Text></Pressable>"
+          if old_nav in s:
+              s=s.replace(old_nav,new_nav,1)
+          elif new_nav not in s:
+              raise SystemExit('messages nav anchor not found')
+          p.write_text(s,encoding='utf-8')
+      - name: Commit fix
+        run: |
+          git config user.name "Kaikki.fi"
+          git config user.email "ayatalimi3366@gmail.com"
+          git add mobile/App.js
+          git diff --cached --quiet && exit 0
+          git commit -m "Refresh mobile messages when opening Viestit"
+          git push
