@@ -99,15 +99,22 @@
     if (!content || content.querySelector('.detail-listing-actions')) return;
     const modal = document.querySelector('#detailsModal');
     if (!modal?.classList.contains('show')) return;
-    const visibleCard = document.querySelector('.card[data-id]');
     let listing = null;
     const title = content.querySelector('h2')?.textContent;
     try { listing = items.find(x => x.t === title); } catch {}
     if (!listing) return;
-    const old = content.querySelector('#contactBtn');
-    if (old) old.style.display = 'none';
+
+    // details-enhancer already creates contact/reserve controls. Hide both so
+    // this module can render one consistent Viesti + Varaa action row only.
+    const oldContact = content.querySelector('#contactBtn');
+    const oldReserve = content.querySelector('#reserveBtn');
+    if (oldContact) oldContact.style.display = 'none';
+    if (oldReserve) oldReserve.style.display = 'none';
+    const oldActions = oldContact?.parentElement;
+    if (oldActions && oldActions === oldReserve?.parentElement) oldActions.style.display = 'none';
     const note = content.querySelector('.prototype-note');
     if (note) note.style.display = 'none';
+
     const wrap = document.createElement('div');
     wrap.className = 'detail-listing-actions';
     const msg = document.createElement('button');
