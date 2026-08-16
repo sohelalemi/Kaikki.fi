@@ -67,14 +67,17 @@ jobs:
         env:
           CI: '1'
         run: npx expo prebuild --platform android --clean
-      - name: Build debug APK
+      - name: Build release APK with bundled JavaScript
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-key
         run: |
           chmod +x android/gradlew
           cd android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Kaikki-fi-Android-APK
-          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          name: Kaikki-fi-Android-Release-APK
+          path: mobile/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
