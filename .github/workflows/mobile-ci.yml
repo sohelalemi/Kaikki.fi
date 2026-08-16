@@ -63,6 +63,19 @@ jobs:
           import cairosvg
           cairosvg.svg2png(url='assets/kaikki-icon.svg', write_to='assets/kaikki-icon.png', output_width=1024, output_height=1024)
           PY
+      - name: Compact home hero
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('App.js')
+          s=p.read_text()
+          old="hero:{backgroundColor:'#e8f3ff',paddingHorizontal:20,paddingTop:18,paddingBottom:34,minHeight:245}"
+          new="hero:{backgroundColor:'#e8f3ff',paddingHorizontal:20,paddingTop:12,paddingBottom:24,minHeight:205}"
+          s=s.replace(old,new)
+          s=s.replace("heroText:{fontSize:15,color:'#405878',fontWeight:'700',marginTop:20,maxWidth:230,lineHeight:21}","heroText:{fontSize:15,color:'#405878',fontWeight:'700',marginTop:12,maxWidth:230,lineHeight:21}")
+          s=s.replace("heroSearch:{height:58,borderRadius:19,backgroundColor:'#fff',flexDirection:'row',alignItems:'center',paddingLeft:14,marginTop:22", "heroSearch:{height:54,borderRadius:19,backgroundColor:'#fff',flexDirection:'row',alignItems:'center',paddingLeft:14,marginTop:14")
+          p.write_text(s)
+          PY
       - name: Generate Android project
         env:
           CI: '1'
