@@ -2,7 +2,7 @@
   "expo": {
     "name": "Kaikki.fi",
     "slug": "kaikkifi",
-    "version": "0.5.3",
+    "version": "0.5.4",
     "orientation": "portrait",
     "scheme": "kaikki",
     "userInterfaceStyle": "automatic",
@@ -23,6 +23,7 @@
     },
     "android": {
       "package": "fi.kaikki.app",
+      "versionCode": 4,
       "adaptiveIcon": {
         "foregroundImage": "./assets/kaikki-icon.png",
         "backgroundColor": "#FFFFFF"
