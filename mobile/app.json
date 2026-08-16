@@ -2,10 +2,11 @@
   "expo": {
     "name": "Kaikki.fi",
     "slug": "kaikkifi",
-    "version": "0.5.1",
+    "version": "0.5.2",
     "orientation": "portrait",
     "scheme": "kaikki",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/kaikki-icon.svg",
     "extra": {
       "eas": {
         "projectId": "9170cf8d-c356-4fd8-9f5b-a8c944543bea"
@@ -20,7 +21,13 @@
         "NSLocationWhenInUseUsageDescription": "Kaikki.fi käyttää sijaintiasi ilmoituksen tarkan sijainnin valintaan."
       }
     },
-    "android": {"package": "fi.kaikki.app"},
+    "android": {
+      "package": "fi.kaikki.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/kaikki-icon.svg",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
     "plugins": ["expo-notifications","expo-image-picker","expo-location"]
   }
 }
