@@ -24,6 +24,7 @@
     "android": {
       "package": "fi.kaikki.app",
       "versionCode": 5,
+      "edgeToEdgeEnabled": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/kaikki-icon.png",
         "backgroundColor": "#FFFFFF"
