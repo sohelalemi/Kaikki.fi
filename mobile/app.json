@@ -2,17 +2,13 @@
   "expo": {
     "name": "Kaikki.fi",
     "slug": "kaikkifi",
-    "version": "0.5.6",
+    "version": "0.5.7",
     "orientation": "portrait",
     "scheme": "kaikki",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/kaikki-icon.png",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
     "updates": {
-      "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 0
+      "enabled": false
     },
     "extra": {
       "eas": {
@@ -30,7 +26,8 @@
     },
     "android": {
       "package": "fi.kaikki.app",
-      "versionCode": 6,
+      "versionCode": 7,
+      "edgeToEdgeEnabled": false,
       "navigationBar": {
         "visible": "leanback",
         "barStyle": "dark-content",
