@@ -1,45 +1,13 @@
 name: Apply Android home design
+
 on:
-  push:
-    paths:
-      - '.github/workflows/apply-android-home-design.yml'
+  workflow_dispatch:
+
 permissions:
-  contents: write
+  contents: read
+
 jobs:
-  patch:
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Apply Kaikki.fi Android home design
-        shell: python
-        run: |
-          from pathlib import Path
-          p=Path('mobile/App.js')
-          s=p.read_text(encoding='utf-8')
-
-          old="""{tab==='home'&&<><View style={s.homeTop}><View style={s.searchShell}><Text style={s.searchIcon}>⌕</Text><TextInput style={s.searchInput} value={query} onChangeText={setQuery} placeholder=\"Mitä etsit?\" placeholderTextColor=\"#94a3b8\"/></View></View><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.categoryStrip}>{categories.map(c=><Pressable key={c} onPress={()=>setCategory(c)} style={[s.categoryPill,category===c&&s.categoryPillActive]}><Text style={s.categoryEmoji}>{categoryIcons[c]}</Text><Text style={category===c?s.categoryTextActive:s.categoryText}>{c}</Text></Pressable>)}</ScrollView><View style={s.homeSectionHead}><View><Text style={s.homeSectionTitle}>{category==='Kaikki'?'Uusimmat ilmoitukset':category}</Text><Text style={s.homeSectionMeta}>{filtered.length} ilmoitusta</Text></View><Text style={s.homeSectionMeta}>Kaikki.fi</Text></View><FlatList data={filtered} keyExtractor={x=>String(x.id)} contentContainerStyle={s.marketList} ListEmptyComponent={<View style={s.emptyState}><Text style={s.emptyEmoji}>🔎</Text><Text style={s.emptyTitle}>Ei ilmoituksia</Text><Text style={s.emptyText}>Kokeile toista hakua tai kategoriaa.</Text></View>} renderItem={({item})=>marketCard(item)}/></>}"""
-
-          new="""{tab==='home'&&<ScrollView contentContainerStyle={s.homePage} showsVerticalScrollIndicator={false}><View style={s.hero}><View style={s.heroTop}><View><Text style={s.heroLogo}>Kaikki.fi</Text><Text style={s.heroTag}>Osta · Myy · Löydä</Text></View><Text style={s.heroPin}>📍</Text></View><Text style={s.heroText}>Suomen monipuolisin osto- ja myyntialusta</Text><View style={s.heroSearch}><Text style={s.heroSearchIcon}>⌕</Text><TextInput style={s.heroSearchInput} value={query} onChangeText={setQuery} placeholder=\"Hae tuotteita, palveluita...\" placeholderTextColor=\"#8fa0b8\"/><Pressable style={s.heroSearchButton}><Text style={s.heroSearchButtonText}>⌕</Text></Pressable></View></View><View style={s.quickPanel}>{[['Autot','🚗','Autot'],['Asunnot','🏠','Asunnot'],['Elektroniikka','📱','Elektroniikka'],['Koti & Sisustus','🛋️','Koti'],['Vapaa-aika','🚲','Palvelut'],['Ja paljon muuta','🏷️','Kaikki']].map(([label,icon,value])=><Pressable key={label} onPress={()=>setCategory(value)} style={s.quickItem}><View style={[s.quickIconWrap,category===value&&s.quickIconWrapActive]}><Text style={s.quickIcon}>{icon}</Text></View><Text style={[s.quickLabel,category===value&&s.quickLabelActive]}>{label}</Text></Pressable>)}</View><View style={s.popularHead}><Text style={s.popularTitle}>Suositut kategoriat</Text><Pressable onPress={()=>setCategory('Kaikki')}><Text style={s.showAll}>Näytä kaikki ›</Text></Pressable></View><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.popularRow}>{[['Autot','🚘'],['Asunnot','🏢'],['Elektroniikka','📱'],['Koti','🛋️']].map(([name,icon])=><Pressable key={name} onPress={()=>setCategory(name)} style={s.popularCard}><View style={s.popularImage}><Text style={s.popularEmoji}>{icon}</Text></View><Text style={s.popularName}>{name}</Text><Text style={s.popularCount}>{listings.filter(x=>x.category===name).length.toLocaleString('fi-FI')} ilmoitusta</Text></Pressable>)}</ScrollView><View style={s.trustGrid}><View style={s.trustItem}><Text style={s.trustIcon}>🛡️</Text><View style={s.trustCopy}><Text style={s.trustTitle}>Turvallista kaupankäyntiä</Text><Text style={s.trustText}>Vahva tunnistautuminen ja turvalliset maksut</Text></View></View><View style={s.trustItem}><Text style={s.trustIcon}>💬</Text><View style={s.trustCopy}><Text style={s.trustTitle}>Helppoa viestintää</Text><Text style={s.trustText}>Ota yhteyttä nopeasti ja vaivattomasti</Text></View></View><View style={s.trustItem}><Text style={s.trustIcon}>♡</Text><View style={s.trustCopy}><Text style={s.trustTitle}>Suosikit</Text><Text style={s.trustText}>Tallenna suosikkisi helposti</Text></View></View><View style={s.trustItem}><Text style={s.trustIcon}>🌐</Text><View style={s.trustCopy}><Text style={s.trustTitle}>Monikielinen</Text><Text style={s.trustText}>Suomeksi, englanniksi ja persiaksi</Text></View></View></View><View style={s.homeSectionHead}><View><Text style={s.homeSectionTitle}>{category==='Kaikki'?'Uusimmat ilmoitukset':category}</Text><Text style={s.homeSectionMeta}>{filtered.length} ilmoitusta</Text></View></View>{filtered.length?<View style={s.marketList}>{filtered.map(item=><View key={String(item.id)}>{marketCard(item)}</View>)}</View>:<View style={s.emptyState}><Text style={s.emptyEmoji}>🔎</Text><Text style={s.emptyTitle}>Ei ilmoituksia</Text><Text style={s.emptyText}>Kokeile toista hakua tai kategoriaa.</Text></View>}</ScrollView>}"""
-
-          if old not in s:
-              if "style={s.hero}" not in s:
-                  raise SystemExit('home screen anchor not found')
-          else:
-              s=s.replace(old,new,1)
-
-          anchor="homeTop:{paddingHorizontal:16,paddingTop:12,paddingBottom:4,backgroundColor:'#fff'},"
-          styles="""homePage:{paddingBottom:105,backgroundColor:'#f6f9fd'},hero:{backgroundColor:'#e8f3ff',paddingHorizontal:20,paddingTop:18,paddingBottom:34,minHeight:245},heroTop:{flexDirection:'row',justifyContent:'space-between',alignItems:'flex-start'},heroLogo:{fontSize:37,fontWeight:'900',color:'#3157c8',letterSpacing:-1},heroTag:{fontSize:13,fontWeight:'800',color:'#3f526c',marginTop:-2},heroPin:{fontSize:33,marginTop:12},heroText:{fontSize:15,color:'#405878',fontWeight:'700',marginTop:20,maxWidth:230,lineHeight:21},heroSearch:{height:58,borderRadius:19,backgroundColor:'#fff',flexDirection:'row',alignItems:'center',paddingLeft:14,marginTop:22,shadowColor:'#000',shadowOpacity:.08,shadowRadius:9,shadowOffset:{width:0,height:4},elevation:3},heroSearchIcon:{fontSize:24,color:'#7890ac',marginRight:8},heroSearchInput:{flex:1,fontSize:15,color:'#13233a'},heroSearchButton:{height:48,width:54,borderRadius:16,backgroundColor:'#4b78ee',alignItems:'center',justifyContent:'center',marginRight:5},heroSearchButtonText:{color:'#fff',fontSize:24,fontWeight:'900'},quickPanel:{marginTop:-16,marginHorizontal:14,backgroundColor:'#fff',borderRadius:24,paddingVertical:18,paddingHorizontal:8,flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between',shadowColor:'#000',shadowOpacity:.08,shadowRadius:10,shadowOffset:{width:0,height:4},elevation:3},quickItem:{width:'16.6%',alignItems:'center',gap:6},quickIconWrap:{width:46,height:46,borderRadius:23,backgroundColor:'#edf4ff',alignItems:'center',justifyContent:'center'},quickIconWrapActive:{backgroundColor:'#dbe8ff',borderWidth:2,borderColor:'#4b78ee'},quickIcon:{fontSize:24},quickLabel:{fontSize:10.5,color:'#53657c',fontWeight:'700',textAlign:'center',lineHeight:13},quickLabelActive:{color:'#3157c8',fontWeight:'900'},popularHead:{paddingHorizontal:18,paddingTop:24,paddingBottom:12,flexDirection:'row',justifyContent:'space-between',alignItems:'center'},popularTitle:{fontSize:18,fontWeight:'900',color:'#1d2b42'},showAll:{color:'#4b78ee',fontWeight:'800',fontSize:13},popularRow:{paddingHorizontal:14,gap:10,paddingBottom:8},popularCard:{width:132,backgroundColor:'#fff',borderRadius:15,overflow:'hidden',borderWidth:1,borderColor:'#e5ebf3'},popularImage:{height:82,backgroundColor:'#edf3fa',alignItems:'center',justifyContent:'center'},popularEmoji:{fontSize:42},popularName:{fontWeight:'900',fontSize:14,color:'#24344c',paddingHorizontal:10,paddingTop:9},popularCount:{fontSize:10.5,color:'#8090a5',paddingHorizontal:10,paddingBottom:10,paddingTop:2},trustGrid:{marginHorizontal:16,marginTop:18,backgroundColor:'#fff',borderRadius:18,padding:15,gap:14,borderWidth:1,borderColor:'#edf1f6'},trustItem:{flexDirection:'row',alignItems:'center',gap:12},trustIcon:{fontSize:29,width:38,textAlign:'center'},trustCopy:{flex:1},trustTitle:{fontSize:14,fontWeight:'900',color:'#2c3e58'},trustText:{fontSize:11.5,color:'#7a899d',marginTop:2,lineHeight:16},"""
-          if 'heroLogo:' not in s:
-              if anchor not in s:
-                  raise SystemExit('style anchor not found')
-              s=s.replace(anchor,styles+anchor,1)
-
-          p.write_text(s,encoding='utf-8')
-      - name: Commit Android design
-        run: |
-          git config user.name "Kaikki.fi"
-          git config user.email "ayatalimi3366@gmail.com"
-          git add mobile/App.js
-          git diff --cached --quiet && exit 0
-          git commit -m "Apply reference home design to Android app"
-          git push
+      - run: echo "Automatic Android home redesign is disabled. The mobile UI now comes only from mobile/App.js."
