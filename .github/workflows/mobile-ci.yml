@@ -1,6 +1,7 @@
 name: Mobile CI
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'mobile/**'
@@ -40,7 +41,7 @@ jobs:
         run: npx expo export --platform ios --output-dir dist-ios
 
   build-android-apk:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     defaults:
       run:
