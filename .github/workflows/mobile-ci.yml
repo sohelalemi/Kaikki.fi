@@ -23,6 +23,10 @@ jobs:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore last known good App.js
+        run: git show 106bc58:mobile/App.js > App.js
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -52,6 +56,10 @@ jobs:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore last known good App.js
+        run: git show 106bc58:mobile/App.js > App.js
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -84,10 +92,7 @@ jobs:
           new_home="""{tab==='home'&&<ScrollView contentContainerStyle={s.homePage} showsVerticalScrollIndicator={false}><View style={s.categoryTitleWrap}><Text style={s.categoryTitle}>Kategoriat</Text></View><View style={s.quickPanel}>{[['Autot','🚗','Autot'],['Asunnot','🏠','Asunnot'],['Elektroniikka','📱','Elektroniikka'],['Koti & Sisustus','🛋️','Koti'],['Vapaa-aika','🚲','Palvelut'],['Lapset ja vanhemmat','👶','Kaikki'],['Eläintarvikkeet','🐾','Kaikki'],['Piha ja remontointi','🌿','Kaikki'],['Antiikki ja taide','🖼️','Kaikki'],['Ja paljon muuta','🏷️','Kaikki']].map(([label,icon,value])=><Pressable key={label} onPress={()=>setCategory(value)} style={s.quickItem}><View style={[s.quickIconWrap,category===value&&s.quickIconWrapActive]}><Text style={s.quickIcon}>{icon}</Text></View><Text style={[s.quickLabel,category===value&&s.quickLabelActive]} numberOfLines={2}>{label}</Text></Pressable>)}</View><View style={s.homeSectionHead}><View><Text style={s.homeSectionTitle}>Uusimmat ilmoitukset</Text><Text style={s.homeSectionMeta}>{filtered.length} ilmoitusta</Text></View></View>{filtered.length?<View style={s.marketList}>{filtered.map(item=><View key={String(item.id)}>{marketCard(item)}</View>)}</View>:<View style={s.emptyState}><Text style={s.emptyEmoji}>🔎</Text><Text style={s.emptyTitle}>Ei ilmoituksia</Text><Text style={s.emptyText}>Kokeile toista hakua tai kategoriaa.</Text></View>}</ScrollView>}\n """
           s=s[:start]+new_home+s[end:]
 
-          # Force an exact five-column grid on every build, regardless of older persisted styles.
-          s=re.sub(r"quickPanel:\{[^}]*\}", "quickPanel:{marginTop:4,marginHorizontal:8,backgroundColor:'#fff',borderRadius:18,paddingVertical:8,paddingHorizontal:2,flexDirection:'row',flexWrap:'wrap',justifyContent:'flex-start',alignItems:'flex-start'}", s, count=1)
-          # Older builds can leave the former elevation property outside quickPanel; fold it back in.
-          s=s.replace("alignItems:'flex-start'},elevation:3},quickItem", "alignItems:'flex-start',elevation:3},quickItem")
+          s=re.sub(r"quickPanel:\{[^}]*\}", "quickPanel:{marginTop:4,marginHorizontal:8,backgroundColor:'#fff',borderRadius:18,paddingVertical:8,paddingHorizontal:2,flexDirection:'row',flexWrap:'wrap',justifyContent:'flex-start',alignItems:'flex-start',elevation:3}", s, count=1)
           s=re.sub(r"quickItem:\{[^}]*\}", "quickItem:{width:'20%',minWidth:'20%',maxWidth:'20%',flexBasis:'20%',flexGrow:0,flexShrink:0,minHeight:72,alignItems:'center',justifyContent:'center',gap:4,paddingVertical:5,paddingHorizontal:1}", s, count=1)
           s=re.sub(r"quickIconWrap:\{[^}]*\}", "quickIconWrap:{width:38,height:38,borderRadius:19,backgroundColor:'#eef5ff',alignItems:'center',justifyContent:'center'}", s, count=1)
           s=re.sub(r"quickIcon:\{[^}]*\}", "quickIcon:{fontSize:20}", s, count=1)
@@ -95,36 +100,15 @@ jobs:
           if 'categoryTitleWrap:' not in s:
               s=s.replace("popularHead:{", "categoryTitleWrap:{paddingHorizontal:14,paddingTop:10,paddingBottom:2},categoryTitle:{fontSize:20,fontWeight:'900',color:'#0f172a'},popularHead:{")
 
-          # Keep the confirmed bottom navigation position unchanged.
           s=s.replace("bottom:{position:'absolute',left:0,right:0,bottom:-48,height:82", "bottom:{position:'absolute',left:0,right:0,bottom:-28,height:82")
           s=s.replace("bottom:{position:'absolute',left:0,right:0,bottom:0,height:78", "bottom:{position:'absolute',left:0,right:0,bottom:-28,height:82")
           s=s.replace("bottom:{position:'absolute',left:0,right:0,bottom:0,height:82", "bottom:{position:'absolute',left:0,right:0,bottom:-28,height:82")
-
-          s=s.replace("compose:{position:'absolute',left:0,right:0,bottom:36", "compose:{position:'absolute',left:0,right:0,bottom:56")
-          s=s.replace("compose:{position:'absolute',left:0,right:0,bottom:84", "compose:{position:'absolute',left:0,right:0,bottom:56")
-          s=s.replace("compose:{position:'absolute',left:0,right:0,bottom:74", "compose:{position:'absolute',left:0,right:0,bottom:56")
 
           for old,new in [
               ("homePage:{paddingBottom:170", "homePage:{paddingBottom:100"),
               ("homePage:{paddingBottom:118", "homePage:{paddingBottom:100"),
               ("homePage:{paddingBottom:90", "homePage:{paddingBottom:100"),
-              ("homePage:{paddingBottom:105", "homePage:{paddingBottom:100"),
-              ("list:{padding:14,gap:14,paddingBottom:165", "list:{padding:14,gap:14,paddingBottom:105"),
-              ("list:{padding:14,gap:14,paddingBottom:118", "list:{padding:14,gap:14,paddingBottom:105"),
-              ("list:{padding:14,gap:14,paddingBottom:95", "list:{padding:14,gap:14,paddingBottom:105"),
-              ("list:{padding:14,gap:14,paddingBottom:100", "list:{padding:14,gap:14,paddingBottom:105"),
-              ("form:{padding:20,gap:14,paddingBottom:175", "form:{padding:20,gap:14,paddingBottom:110"),
-              ("form:{padding:20,gap:14,paddingBottom:125", "form:{padding:20,gap:14,paddingBottom:110"),
-              ("form:{padding:20,gap:14,paddingBottom:100", "form:{padding:20,gap:14,paddingBottom:110"),
-              ("detail:{padding:20,gap:14,paddingBottom:175", "detail:{padding:20,gap:14,paddingBottom:110"),
-              ("detail:{padding:20,gap:14,paddingBottom:125", "detail:{padding:20,gap:14,paddingBottom:110"),
-              ("detail:{padding:20,gap:14,paddingBottom:100", "detail:{padding:20,gap:14,paddingBottom:110"),
-              ("marketList:{paddingHorizontal:14,paddingBottom:175", "marketList:{paddingHorizontal:14,paddingBottom:110"),
-              ("marketList:{paddingHorizontal:14,paddingBottom:125", "marketList:{paddingHorizontal:14,paddingBottom:110"),
-              ("marketList:{paddingHorizontal:14,paddingBottom:100", "marketList:{paddingHorizontal:14,paddingBottom:110"),
-              ("profilePage:{paddingHorizontal:16,paddingTop:6,paddingBottom:175", "profilePage:{paddingHorizontal:16,paddingTop:6,paddingBottom:110"),
-              ("profilePage:{paddingHorizontal:16,paddingTop:6,paddingBottom:125", "profilePage:{paddingHorizontal:16,paddingTop:6,paddingBottom:110"),
-              ("profilePage:{paddingHorizontal:16,paddingTop:6,paddingBottom:100", "profilePage:{paddingHorizontal:16,paddingTop:6,paddingBottom:110")]:
+              ("homePage:{paddingBottom:105", "homePage:{paddingBottom:100")]:
               s=s.replace(old,new)
           p.write_text(s)
           PY
@@ -134,7 +118,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add App.js
           if ! git diff --cached --quiet; then
-            git commit -m "Fix exact five-column Android categories [skip ci]"
+            git commit -m "Restore stable App.js and apply five-column categories [skip ci]"
             git push origin HEAD:main
           fi
       - name: Generate Android project
