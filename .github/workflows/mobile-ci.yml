@@ -86,6 +86,8 @@ jobs:
 
           # Force an exact five-column grid on every build, regardless of older persisted styles.
           s=re.sub(r"quickPanel:\{[^}]*\}", "quickPanel:{marginTop:4,marginHorizontal:8,backgroundColor:'#fff',borderRadius:18,paddingVertical:8,paddingHorizontal:2,flexDirection:'row',flexWrap:'wrap',justifyContent:'flex-start',alignItems:'flex-start'}", s, count=1)
+          # Older builds can leave the former elevation property outside quickPanel; fold it back in.
+          s=s.replace("alignItems:'flex-start'},elevation:3},quickItem", "alignItems:'flex-start',elevation:3},quickItem")
           s=re.sub(r"quickItem:\{[^}]*\}", "quickItem:{width:'20%',minWidth:'20%',maxWidth:'20%',flexBasis:'20%',flexGrow:0,flexShrink:0,minHeight:72,alignItems:'center',justifyContent:'center',gap:4,paddingVertical:5,paddingHorizontal:1}", s, count=1)
           s=re.sub(r"quickIconWrap:\{[^}]*\}", "quickIconWrap:{width:38,height:38,borderRadius:19,backgroundColor:'#eef5ff',alignItems:'center',justifyContent:'center'}", s, count=1)
           s=re.sub(r"quickIcon:\{[^}]*\}", "quickIcon:{fontSize:20}", s, count=1)
@@ -132,7 +134,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add App.js
           if ! git diff --cached --quiet; then
-            git commit -m "Force exact five-column Android categories [skip ci]"
+            git commit -m "Fix exact five-column Android categories [skip ci]"
             git push origin HEAD:main
           fi
       - name: Generate Android project
