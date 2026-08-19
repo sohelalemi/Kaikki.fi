@@ -1,5 +1,8 @@
 name: Mobile CI
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
   pull_request:
@@ -65,31 +68,23 @@ jobs:
           import cairosvg
           cairosvg.svg2png(url='assets/kaikki-icon.svg', write_to='assets/kaikki-icon.png', output_width=1024, output_height=1024)
           PY
-      - name: Apply fixed Android mobile design
+      - name: Remove legacy blue Android home from source
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('App.js')
           s=p.read_text()
 
-          # Remove the legacy blue hero by slicing from its exact opening marker
-          # to the start of the category panel. This works even with nested Views.
           hero_start=s.find("<View style={s.hero}>")
           categories_start=s.find("<View style={s.quickPanel}>", hero_start if hero_start >= 0 else 0)
           if hero_start >= 0 and categories_start > hero_start:
               s=s[:hero_start]+s[categories_start:]
 
-          # Keep category taps inside the same home page.
-          s=s.replace("onPress={()=>setCategory(value)} style={s.quickItem}", "onPress={()=>setCategory(value)} style={s.quickItem}")
-          s=s.replace("onPress={()=>setCategory(name)} style={s.popularCard}", "onPress={()=>setCategory(name)} style={s.popularCard}")
-
-          # Standardize bottom navigation to: Etusivu | Haku | Lisää | Suosikit | Oma.
           old_nav="<View style={s.bottom}><Pressable onPress={()=>setTab('home')} style={s.bottomItem}><Text style={tab==='home'?s.bottomIconActive:s.bottomIcon}>⌂</Text><Text style={tab==='home'?s.bottomLabelActive:s.bottomLabel}>Etusivu</Text></Pressable><Pressable onPress={()=>{loadNotifications();setTab('notifications')}} style={s.bottomItem}><Text style={tab==='notifications'?s.bottomIconActive:s.bottomIcon}>♢</Text><Text style={tab==='notifications'?s.bottomLabelActive:s.bottomLabel}>Ilmoitukset</Text></Pressable><Pressable onPress={()=>setTab('sell')} style={s.bottomItem}><Text style={s.bottomPlus}>＋</Text><Text style={tab==='sell'?s.bottomLabelActive:s.bottomLabel}>Uusi ilmoitus</Text></Pressable><Pressable onPress={()=>{loadMessages();setTab('messages')}} style={s.bottomItem}><Text style={tab==='messages'?s.bottomIconActive:s.bottomIcon}>◉</Text><Text style={tab==='messages'?s.bottomLabelActive:s.bottomLabel}>Viestit</Text></Pressable><Pressable onPress={()=>setTab('profile')} style={s.bottomItem}><Text style={['profile','myListings'].includes(tab)?s.bottomIconActive:s.bottomIcon}>♙</Text><Text style={['profile','myListings'].includes(tab)?s.bottomLabelActive:s.bottomLabel}>Oma Kaikki</Text></Pressable></View>"
           new_nav="<View style={s.bottom}><Pressable onPress={()=>setTab('home')} style={s.bottomItem}><Text style={tab==='home'?s.bottomIconActive:s.bottomIcon}>⌂</Text><Text style={tab==='home'?s.bottomLabelActive:s.bottomLabel}>Etusivu</Text></Pressable><Pressable onPress={()=>{setCategory('Kaikki');setTab('home')}} style={s.bottomItem}><Text style={s.bottomIcon}>⌕</Text><Text style={s.bottomLabel}>Haku</Text></Pressable><Pressable onPress={()=>setTab('sell')} style={s.bottomItem}><View style={s.sellTab}><Text style={s.sellTabText}>＋</Text></View><Text style={tab==='sell'?s.bottomLabelActive:s.bottomLabel}>Lisää</Text></Pressable><Pressable onPress={()=>setTab('favorites')} style={s.bottomItem}><Text style={tab==='favorites'?s.bottomIconActive:s.bottomIcon}>♡</Text><Text style={tab==='favorites'?s.bottomLabelActive:s.bottomLabel}>Suosikit</Text></Pressable><Pressable onPress={()=>setTab('profile')} style={s.bottomItem}><Text style={['profile','myListings'].includes(tab)?s.bottomIconActive:s.bottomIcon}>♙</Text><Text style={['profile','myListings'].includes(tab)?s.bottomLabelActive:s.bottomLabel}>Oma</Text></Pressable></View>"
           if old_nav in s:
               s=s.replace(old_nav,new_nav)
 
-          # Keep the app bar above Android three-button navigation and content clear of it.
           s=s.replace("bottom:{position:'absolute',left:0,right:0,bottom:0,height:78", "bottom:{position:'absolute',left:0,right:0,bottom:48,height:88")
           s=s.replace("compose:{position:'absolute',left:0,right:0,bottom:74", "compose:{position:'absolute',left:0,right:0,bottom:136")
           s=s.replace("homePage:{paddingBottom:105", "homePage:{paddingBottom:170")
@@ -100,6 +95,15 @@ jobs:
           s=s.replace("profilePage:{paddingHorizontal:16,paddingTop:6,paddingBottom:110", "profilePage:{paddingHorizontal:16,paddingTop:6,paddingBottom:175")
           p.write_text(s)
           PY
+      - name: Persist Android home source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add App.js
+          if ! git diff --cached --quiet; then
+            git commit -m "Remove legacy blue Android home from source [skip ci]"
+            git push origin HEAD:main
+          fi
       - name: Generate Android project
         env:
           CI: '1'
