@@ -68,17 +68,25 @@ jobs:
           import cairosvg
           cairosvg.svg2png(url='assets/kaikki-icon.svg', write_to='assets/kaikki-icon.png', output_width=1024, output_height=1024)
           PY
-      - name: Remove legacy blue Android home from source
+      - name: Replace legacy Android home with current web layout
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('App.js')
           s=p.read_text()
 
-          hero_start=s.find("<View style={s.hero}>")
-          categories_start=s.find("<View style={s.quickPanel}>", hero_start if hero_start >= 0 else 0)
-          if hero_start >= 0 and categories_start > hero_start:
-              s=s[:hero_start]+s[categories_start:]
+          start=s.find("{tab==='home'&&<ScrollView")
+          end=s.find("{tab==='favorites'&&", start)
+          if start < 0 or end < 0:
+              raise SystemExit('Home view markers not found')
+
+          new_home="""{tab==='home'&&<ScrollView contentContainerStyle={s.homePage} showsVerticalScrollIndicator={false}><View style={s.quickPanel}>{[['Autot','🚗','Autot'],['Asunnot','🏠','Asunnot'],['Elektroniikka','📱','Elektroniikka'],['Koti & Sisustus','🛋️','Koti'],['Vapaa-aika','🚲','Palvelut'],['Lapset ja vanhemmat','👶','Kaikki'],['Eläintarvikkeet','🐾','Kaikki'],['Piha ja remontointi','🌿','Kaikki'],['Antiikki ja taide','🖼️','Kaikki'],['Ja paljon muuta','🏷️','Kaikki']].map(([label,icon,value])=><Pressable key={label} onPress={()=>setCategory(value)} style={s.quickItem}><View style={[s.quickIconWrap,category===value&&s.quickIconWrapActive]}><Text style={s.quickIcon}>{icon}</Text></View><Text style={[s.quickLabel,category===value&&s.quickLabelActive]}>{label}</Text></Pressable>)}</View><View style={s.homeSectionHead}><View><Text style={s.homeSectionTitle}>Uusimmat</Text><Text style={s.homeSectionMeta}>{filtered.length} ilmoitusta</Text></View></View>{filtered.length?<View style={s.marketList}>{filtered.map(item=><View key={String(item.id)}>{marketCard(item)}</View>)}</View>:<View style={s.emptyState}><Text style={s.emptyEmoji}>🔎</Text><Text style={s.emptyTitle}>Ei ilmoituksia</Text><Text style={s.emptyText}>Kokeile toista hakua tai kategoriaa.</Text></View>}</ScrollView>}\n """
+          s=s[:start]+new_home+s[end:]
+
+          s=s.replace("quickPanel:{marginTop:-16,marginHorizontal:14", "quickPanel:{marginTop:8,marginHorizontal:14")
+          s=s.replace("quickItem:{width:'16.6%'", "quickItem:{width:'50%'")
+          s=s.replace("quickPanel:{marginTop:8,marginHorizontal:14,backgroundColor:'#fff',borderRadius:24,paddingVertical:18,paddingHorizontal:8,flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between'", "quickPanel:{marginTop:8,marginHorizontal:14,backgroundColor:'#fff',borderRadius:24,paddingVertical:12,paddingHorizontal:8,flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between'")
+          s=s.replace("quickItem:{width:'50%',alignItems:'center',gap:6}", "quickItem:{width:'50%',minHeight:84,alignItems:'center',justifyContent:'center',gap:6,paddingVertical:8}")
 
           old_nav="<View style={s.bottom}><Pressable onPress={()=>setTab('home')} style={s.bottomItem}><Text style={tab==='home'?s.bottomIconActive:s.bottomIcon}>⌂</Text><Text style={tab==='home'?s.bottomLabelActive:s.bottomLabel}>Etusivu</Text></Pressable><Pressable onPress={()=>{loadNotifications();setTab('notifications')}} style={s.bottomItem}><Text style={tab==='notifications'?s.bottomIconActive:s.bottomIcon}>♢</Text><Text style={tab==='notifications'?s.bottomLabelActive:s.bottomLabel}>Ilmoitukset</Text></Pressable><Pressable onPress={()=>setTab('sell')} style={s.bottomItem}><Text style={s.bottomPlus}>＋</Text><Text style={tab==='sell'?s.bottomLabelActive:s.bottomLabel}>Uusi ilmoitus</Text></Pressable><Pressable onPress={()=>{loadMessages();setTab('messages')}} style={s.bottomItem}><Text style={tab==='messages'?s.bottomIconActive:s.bottomIcon}>◉</Text><Text style={tab==='messages'?s.bottomLabelActive:s.bottomLabel}>Viestit</Text></Pressable><Pressable onPress={()=>setTab('profile')} style={s.bottomItem}><Text style={['profile','myListings'].includes(tab)?s.bottomIconActive:s.bottomIcon}>♙</Text><Text style={['profile','myListings'].includes(tab)?s.bottomLabelActive:s.bottomLabel}>Oma Kaikki</Text></Pressable></View>"
           new_nav="<View style={s.bottom}><Pressable onPress={()=>setTab('home')} style={s.bottomItem}><Text style={tab==='home'?s.bottomIconActive:s.bottomIcon}>⌂</Text><Text style={tab==='home'?s.bottomLabelActive:s.bottomLabel}>Etusivu</Text></Pressable><Pressable onPress={()=>{setCategory('Kaikki');setTab('home')}} style={s.bottomItem}><Text style={s.bottomIcon}>⌕</Text><Text style={s.bottomLabel}>Haku</Text></Pressable><Pressable onPress={()=>setTab('sell')} style={s.bottomItem}><View style={s.sellTab}><Text style={s.sellTabText}>＋</Text></View><Text style={tab==='sell'?s.bottomLabelActive:s.bottomLabel}>Lisää</Text></Pressable><Pressable onPress={()=>setTab('favorites')} style={s.bottomItem}><Text style={tab==='favorites'?s.bottomIconActive:s.bottomIcon}>♡</Text><Text style={tab==='favorites'?s.bottomLabelActive:s.bottomLabel}>Suosikit</Text></Pressable><Pressable onPress={()=>setTab('profile')} style={s.bottomItem}><Text style={['profile','myListings'].includes(tab)?s.bottomIconActive:s.bottomIcon}>♙</Text><Text style={['profile','myListings'].includes(tab)?s.bottomLabelActive:s.bottomLabel}>Oma</Text></Pressable></View>"
@@ -95,13 +103,13 @@ jobs:
           s=s.replace("profilePage:{paddingHorizontal:16,paddingTop:6,paddingBottom:110", "profilePage:{paddingHorizontal:16,paddingTop:6,paddingBottom:175")
           p.write_text(s)
           PY
-      - name: Persist Android home source
+      - name: Persist new Android home source
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add App.js
           if ! git diff --cached --quiet; then
-            git commit -m "Remove legacy blue Android home from source [skip ci]"
+            git commit -m "Replace legacy Android home with current layout [skip ci]"
             git push origin HEAD:main
           fi
       - name: Generate Android project
