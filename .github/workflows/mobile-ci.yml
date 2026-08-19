@@ -73,10 +73,8 @@ jobs:
           p=Path('App.js')
           s=p.read_text()
 
-          # Remove the old blue hero completely so the web-matched category home is the only home view.
-          s,n=re.subn(r"<View style=\{s\.hero\}>.*?</View><View style=\{s\.quickPanel\}>","<View style={s.quickPanel}>",s,count=1)
-          if n!=1:
-              raise SystemExit('Expected legacy blue hero was not found')
+          # If the legacy blue hero still exists, remove it. If it is already gone, continue normally.
+          s=re.sub(r"<View style=\{s\.hero\}>.*?</View><View style=\{s\.quickPanel\}>","<View style={s.quickPanel}>",s,count=1)
 
           # Keep category taps inside the same home page.
           s=s.replace("onPress={()=>setCategory(value)} style={s.quickItem}", "onPress={()=>setCategory(value)} style={s.quickItem}")
