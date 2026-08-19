@@ -69,12 +69,15 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
           p=Path('App.js')
           s=p.read_text()
 
-          # If the legacy blue hero still exists, remove it. If it is already gone, continue normally.
-          s=re.sub(r"<View style=\{s\.hero\}>.*?</View><View style=\{s\.quickPanel\}>","<View style={s.quickPanel}>",s,count=1)
+          # Remove the legacy blue hero by slicing from its exact opening marker
+          # to the start of the category panel. This works even with nested Views.
+          hero_start=s.find("<View style={s.hero}>")
+          categories_start=s.find("<View style={s.quickPanel}>", hero_start if hero_start >= 0 else 0)
+          if hero_start >= 0 and categories_start > hero_start:
+              s=s[:hero_start]+s[categories_start:]
 
           # Keep category taps inside the same home page.
           s=s.replace("onPress={()=>setCategory(value)} style={s.quickItem}", "onPress={()=>setCategory(value)} style={s.quickItem}")
