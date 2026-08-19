@@ -2,7 +2,7 @@
   "expo": {
     "name": "Kaikki.fi",
     "slug": "kaikkifi",
-    "version": "0.5.14",
+    "version": "0.5.15",
     "orientation": "portrait",
     "scheme": "kaikki",
     "userInterfaceStyle": "automatic",
@@ -26,7 +26,7 @@
     },
     "android": {
       "package": "fi.kaikki.app",
-      "versionCode": 14,
+      "versionCode": 15,
       "edgeToEdgeEnabled": false,
       "navigationBar": {
         "visible": "leanback",
