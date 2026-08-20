@@ -61,26 +61,48 @@ jobs:
           java-version: '17'
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Force compact category grid
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p=Path('App.js')
-          s=p.read_text()
-          s=re.sub(r"quickPanel:\{[^}]*\}", "quickPanel:{marginTop:4,marginHorizontal:8,backgroundColor:'#fff',borderRadius:18,paddingVertical:8,paddingHorizontal:2,flexDirection:'row',flexWrap:'wrap',justifyContent:'flex-start',alignItems:'flex-start',elevation:3}", s, count=1)
-          s=re.sub(r"quickItem:\{[^}]*\}", "quickItem:{width:'20%',minWidth:'20%',maxWidth:'20%',flexBasis:'20%',flexGrow:0,flexShrink:0,minHeight:72,alignItems:'center',justifyContent:'center',gap:4,paddingVertical:5,paddingHorizontal:1}", s, count=1)
-          s=re.sub(r"quickIconWrap:\{[^}]*\}", "quickIconWrap:{width:38,height:38,borderRadius:19,backgroundColor:'#eef5ff',alignItems:'center',justifyContent:'center'}", s, count=1)
-          s=re.sub(r"quickIcon:\{[^}]*\}", "quickIcon:{fontSize:20}", s, count=1)
-          s=re.sub(r"quickLabel:\{[^}]*\}", "quickLabel:{fontSize:9.2,color:'#53657c',fontWeight:'700',textAlign:'center',lineHeight:11.5}", s, count=1)
-          p.write_text(s)
-          PY
       - name: Create PNG launcher icon
         run: |
           python3 -m pip install --quiet cairosvg
           python3 - <<'PY'
           import cairosvg
           cairosvg.svg2png(url='assets/kaikki-icon.svg', write_to='assets/kaikki-icon.png', output_width=1024, output_height=1024)
+          PY
+      - name: Force compact 5x2 Android home layout
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('App.js')
+          s=p.read_text()
+
+          start=s.find("{tab==='home'&&<ScrollView")
+          end=s.find("{tab==='favorites'&&", start)
+          if start < 0 or end < 0:
+              raise SystemExit('Home view markers not found')
+
+          new_home="""{tab==='home'&&<ScrollView contentContainerStyle={s.homePage} showsVerticalScrollIndicator={false}><View style={s.homeSearch}><TextInput value={query} onChangeText={setQuery} placeholder=\"Haku\" placeholderTextColor=\"#94a3b8\" style={s.homeSearchInput}/><Text style={s.homeSearchIcon}>⌕</Text></View><View style={s.categoryTitleWrap}><Text style={s.categoryTitle}>Kategoriat</Text></View><View style={s.quickPanel}>{[['Autot','🚗','Autot','#edf4ff'],['Asunnot','🏠','Asunnot','#fff2e8'],['Elektroniikka','📱','Elektroniikka','#f4edff'],['Koti & Sisustus','🛋️','Koti','#edf9ec'],['Vapaa-aika','🚲','Palvelut','#eaf9f7'],['Lapset ja vanhemmat','👶','Kaikki','#fff8df'],['Eläintarvikkeet','🐾','Kaikki','#f7f0e9'],['Piha ja remontointi','🌿','Kaikki','#eaf8ef'],['Antiikki ja taide','🖼️','Kaikki','#f4edff'],['Ja paljon muuta','🏷️','Kaikki','#f1f5f9']].map(([label,icon,value,bg])=><Pressable key={label} onPress={()=>setCategory(value)} style={s.quickItem}><View style={[s.quickIconWrap,{backgroundColor:bg},category===value&&s.quickIconWrapActive]}><Text style={s.quickIcon}>{icon}</Text></View><Text style={[s.quickLabel,category===value&&s.quickLabelActive]} numberOfLines={2}>{label}</Text></Pressable>)}</View><View style={s.homeSectionHead}><View><Text style={s.homeSectionTitle}>Uusimmat</Text><Text style={s.homeSectionMeta}>{filtered.length} ilmoitusta</Text></View></View>{filtered.length?<View style={s.marketList}>{filtered.slice(0,4).map(item=><View key={String(item.id)} style={s.marketGridItem}>{marketCard(item)}</View>)}</View>:<View style={s.emptyState}><Text style={s.emptyEmoji}>🔎</Text><Text style={s.emptyTitle}>Ei ilmoituksia</Text><Text style={s.emptyText}>Kokeile toista hakua tai kategoriaa.</Text></View>}</ScrollView>}\n """
+          s=s[:start]+new_home+s[end:]
+
+          replacements={
+            r"quickPanel:\{.*?\},quickItem:":"quickPanel:{marginTop:4,marginHorizontal:8,backgroundColor:'#fff',borderRadius:18,paddingVertical:8,paddingHorizontal:2,flexDirection:'row',flexWrap:'wrap',justifyContent:'flex-start',alignItems:'flex-start',elevation:2},quickItem:",
+            r"quickItem:\{[^}]*\}":"quickItem:{width:'20%',minWidth:'20%',maxWidth:'20%',flexBasis:'20%',flexGrow:0,flexShrink:0,minHeight:82,alignItems:'center',justifyContent:'flex-start',gap:4,paddingVertical:5,paddingHorizontal:1}",
+            r"quickIconWrap:\{[^}]*\}":"quickIconWrap:{width:42,height:42,borderRadius:14,alignItems:'center',justifyContent:'center'}",
+            r"quickIcon:\{[^}]*\}":"quickIcon:{fontSize:22}",
+            r"quickLabel:\{[^}]*\}":"quickLabel:{fontSize:9.2,color:'#53657c',fontWeight:'700',textAlign:'center',lineHeight:11.5}",
+            r"marketList:\{[^}]*\}":"marketList:{paddingHorizontal:10,paddingBottom:110,gap:10,flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between'}"
+          }
+          for pat,rep in replacements.items():
+              s=re.sub(pat,rep,s,count=1)
+
+          if 'marketGridItem:' not in s:
+              s=s.replace("marketList:{", "marketGridItem:{width:'48.5%'},marketList:{", 1)
+          if 'categoryTitleWrap:' not in s:
+              s=s.replace("popularHead:{", "categoryTitleWrap:{paddingHorizontal:14,paddingTop:10,paddingBottom:2},categoryTitle:{fontSize:20,fontWeight:'900',color:'#0f172a'},popularHead:{")
+          if 'homeSearch:' not in s:
+              s=s.replace("categoryTitleWrap:{", "homeSearch:{marginHorizontal:10,marginTop:8,marginBottom:6,height:46,borderRadius:14,borderWidth:1,borderColor:'#e2e8f0',backgroundColor:'#fff',flexDirection:'row',alignItems:'center',paddingHorizontal:12},homeSearchInput:{flex:1,fontSize:15,color:'#0f172a'},homeSearchIcon:{fontSize:23,color:'#64748b'},categoryTitleWrap:{",1)
+
+          p.write_text(s)
           PY
       - name: Generate Android project
         env:
