@@ -1,4 +1,6 @@
 import {registerRootComponent} from 'expo';
-import App from './App';
+import './layout-fix';
+
+const App = require('./App').default;
 
 registerRootComponent(App);
