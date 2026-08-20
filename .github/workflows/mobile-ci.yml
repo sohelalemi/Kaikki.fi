@@ -89,7 +89,7 @@ jobs:
           if start < 0 or end < 0:
               raise SystemExit('Home view markers not found')
 
-          new_home="""{tab==='home'&&<ScrollView contentContainerStyle={s.homePage} showsVerticalScrollIndicator={false}><View style={s.categoryTitleWrap}><Text style={s.categoryTitle}>Kategoriat</Text></View><View style={s.quickPanel}>{[['Autot','🚗','Autot'],['Asunnot','🏠','Asunnot'],['Elektroniikka','📱','Elektroniikka'],['Koti & Sisustus','🛋️','Koti'],['Vapaa-aika','🚲','Palvelut'],['Lapset ja vanhemmat','👶','Kaikki'],['Eläintarvikkeet','🐾','Kaikki'],['Piha ja remontointi','🌿','Kaikki'],['Antiikki ja taide','🖼️','Kaikki'],['Ja paljon muuta','🏷️','Kaikki']].map(([label,icon,value])=><Pressable key={label} onPress={()=>setCategory(value)} style={s.quickItem}><View style={[s.quickIconWrap,category===value&&s.quickIconWrapActive]}><Text style={s.quickIcon}>{icon}</Text></View><Text style={[s.quickLabel,category===value&&s.quickLabelActive]} numberOfLines={2}>{label}</Text></Pressable>)}</View><View style={s.homeSectionHead}><View><Text style={s.homeSectionTitle}>Uusimmat ilmoitukset</Text><Text style={s.homeSectionMeta}>{filtered.length} ilmoitusta</Text></View></View>{filtered.length?<View style={s.marketList}>{filtered.map(item=><View key={String(item.id)}>{marketCard(item)}</View>)}</View>:<View style={s.emptyState}><Text style={s.emptyEmoji}>🔎</Text><Text style={s.emptyTitle}>Ei ilmoituksia</Text><Text style={s.emptyText}>Kokeile toista hakua tai kategoriaa.</Text></View>}</ScrollView>}\n """
+          new_home="""{tab==='home'&&<ScrollView contentContainerStyle={s.homePage} showsVerticalScrollIndicator={false}><View style={s.categoryTitleWrap}><Text style={s.categoryTitle}>Kategoriat</Text></View><View style={s.quickPanel}>{[['Autot','🚗','Autot'],['Asunnot','🏠','Asunnot'],['Elektroniikka','📱','Elektroniikka'],['Koti & Sisustus','🛋️','Koti'],['Vapaa-aika','🚲','Palvelut'],['Lapset ja vanhemmat','👶','Kaikki'],['Eläintarvikkeet','🐾','Kaikki'],['Piha ja remontointi','🌿','Kaikki'],['Antiikki ja taide','🖼️','Kaikki'],['Ja paljon muuta','🏷️','Kaikki']].map(([label,icon,value])=><Pressable key={label} onPress={()=>setCategory(value)} style={s.quickItem}><View style={[s.quickIconWrap,category===value&&s.quickIconWrapActive]}><Text style={s.quickIcon}>{icon}</Text></View><Text style={[s.quickLabel,category===value&&s.quickLabelActive]} numberOfLines={2}>{label}</Text></Pressable>)}</View><View style={s.homeSectionHead}><View><Text style={s.homeSectionTitle}>Uusimmat ilmoitukset</Text><Text style={s.homeSectionMeta}>{filtered.length} ilmoitusta</Text></View></View>{filtered.length?<View style={s.marketList}>{filtered.slice(0,4).map(item=><View key={String(item.id)} style={s.marketGridItem}>{marketCard(item)}</View>)}</View>:<View style={s.emptyState}><Text style={s.emptyEmoji}>🔎</Text><Text style={s.emptyTitle}>Ei ilmoituksia</Text><Text style={s.emptyText}>Kokeile toista hakua tai kategoriaa.</Text></View>}</ScrollView>}\n """
           s=s[:start]+new_home+s[end:]
 
           panel="quickPanel:{marginTop:4,marginHorizontal:8,backgroundColor:'#fff',borderRadius:18,paddingVertical:8,paddingHorizontal:2,flexDirection:'row',flexWrap:'wrap',justifyContent:'flex-start',alignItems:'flex-start',elevation:3}"
@@ -98,6 +98,16 @@ jobs:
           s=re.sub(r"quickIconWrap:\{[^}]*\}", "quickIconWrap:{width:38,height:38,borderRadius:19,backgroundColor:'#eef5ff',alignItems:'center',justifyContent:'center'}", s, count=1)
           s=re.sub(r"quickIcon:\{[^}]*\}", "quickIcon:{fontSize:20}", s, count=1)
           s=re.sub(r"quickLabel:\{[^}]*\}", "quickLabel:{fontSize:9.2,color:'#53657c',fontWeight:'700',textAlign:'center',lineHeight:11.5}", s, count=1)
+          s=re.sub(r"marketList:\{[^}]*\}", "marketList:{paddingHorizontal:10,paddingBottom:110,gap:10,flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between'}", s, count=1)
+          s=re.sub(r"marketCard:\{[^}]*\}", "marketCard:{backgroundColor:'#fff',borderRadius:16,overflow:'hidden',borderWidth:1,borderColor:'#e5e7eb'}", s, count=1)
+          s=re.sub(r"marketImage:\{[^}]*\}", "marketImage:{width:'100%',height:128,backgroundColor:'#eef2f6'}", s, count=1)
+          s=re.sub(r"marketImagePlaceholder:\{[^}]*\}", "marketImagePlaceholder:{height:128,backgroundColor:'#eef2f6',alignItems:'center',justifyContent:'center'}", s, count=1)
+          s=re.sub(r"marketBody:\{[^}]*\}", "marketBody:{padding:10,gap:4}", s, count=1)
+          s=re.sub(r"marketTitle:\{[^}]*\}", "marketTitle:{fontWeight:'800',fontSize:13,color:'#0f172a'}", s, count=1)
+          s=re.sub(r"marketPrice:\{[^}]*\}", "marketPrice:{fontSize:18,fontWeight:'900',color:'#1565d8'}", s, count=1)
+          s=re.sub(r"marketMeta:\{[^}]*\}", "marketMeta:{color:'#64748b',fontSize:11}", s, count=1)
+          if 'marketGridItem:' not in s:
+              s=s.replace("marketList:{", "marketGridItem:{width:'48.5%'},marketList:{", 1)
           if 'categoryTitleWrap:' not in s:
               s=s.replace("popularHead:{", "categoryTitleWrap:{paddingHorizontal:14,paddingTop:10,paddingBottom:2},categoryTitle:{fontSize:20,fontWeight:'900',color:'#0f172a'},popularHead:{")
 
@@ -119,7 +129,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add App.js
           if ! git diff --cached --quiet; then
-            git commit -m "Restore stable App.js and apply five-column categories [skip ci]"
+            git commit -m "Restore stable App.js and apply mobile 2x2 listings [skip ci]"
             git push origin HEAD:main
           fi
       - name: Generate Android project
