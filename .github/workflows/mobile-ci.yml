@@ -75,40 +75,33 @@ jobs:
           import re
           p=Path('App.js')
           s=p.read_text()
-
           start=s.find("{tab==='home'&&<ScrollView")
           end=s.find("{tab==='favorites'&&", start)
-          if start < 0 or end < 0:
-              raise SystemExit('Home view markers not found')
-
+          if start < 0 or end < 0: raise SystemExit('Home view markers not found')
           new_home="""{tab==='home'&&<ScrollView contentContainerStyle={s.homePage} showsVerticalScrollIndicator={false}><View style={s.homeSearch}><TextInput value={query} onChangeText={setQuery} placeholder=\"Haku\" placeholderTextColor=\"#94a3b8\" style={s.homeSearchInput}/><Text style={s.homeSearchIcon}>⌕</Text></View><View style={s.categoryTitleWrap}><Text style={s.categoryTitle}>Kategoriat</Text></View><View style={s.quickPanel}>{[['Autot','🚗','Autot','#edf4ff'],['Asunnot','🏠','Asunnot','#fff2e8'],['Elektroniikka','📱','Elektroniikka','#f4edff'],['Koti & Sisustus','🛋️','Koti','#edf9ec'],['Vapaa-aika','🚲','Palvelut','#eaf9f7'],['Lapset ja vanhemmat','👶','Kaikki','#fff8df'],['Eläintarvikkeet','🐾','Kaikki','#f7f0e9'],['Piha ja remontointi','🌿','Kaikki','#eaf8ef'],['Antiikki ja taide','🖼️','Kaikki','#f4edff'],['Ja paljon muuta','🏷️','Kaikki','#f1f5f9']].map(([label,icon,value,bg])=><Pressable key={label} onPress={()=>setCategory(value)} style={s.quickItem}><View style={[s.quickIconWrap,{backgroundColor:bg},category===value&&s.quickIconWrapActive]}><Text style={s.quickIcon}>{icon}</Text></View><Text style={[s.quickLabel,category===value&&s.quickLabelActive]} numberOfLines={2}>{label}</Text></Pressable>)}</View><View style={s.homeSectionHead}><View><Text style={s.homeSectionTitle}>Uusimmat</Text><Text style={s.homeSectionMeta}>{filtered.length} ilmoitusta</Text></View></View>{filtered.length?<View style={s.marketList}>{filtered.slice(0,4).map(item=><View key={String(item.id)} style={s.marketGridItem}>{marketCard(item)}</View>)}</View>:<View style={s.emptyState}><Text style={s.emptyEmoji}>🔎</Text><Text style={s.emptyTitle}>Ei ilmoituksia</Text><Text style={s.emptyText}>Kokeile toista hakua tai kategoriaa.</Text></View>}</ScrollView>}\n """
           s=s[:start]+new_home+s[end:]
-
           bottom_start=s.find('<View style={s.bottom}>')
           bottom_end=s.find('</View></SafeAreaView>', bottom_start)
-          if bottom_start < 0 or bottom_end < 0:
-              raise SystemExit('Bottom navigation markers not found')
-          new_bottom="""<View style={s.bottom}><Pressable onPress={()=>setTab('home')} style={s.bottomItem}><Text style={tab==='home'?s.bottomIconActive:s.bottomIcon}>⌂</Text><Text style={tab==='home'?s.bottomLabelActive:s.bottomLabel}>Etusivu</Text></Pressable><Pressable onPress={()=>setTab('notifications')} style={s.bottomItem}><Text style={tab==='notifications'?s.bottomIconActive:s.bottomIcon}>♢</Text><Text style={tab==='notifications'?s.bottomLabelActive:s.bottomLabel}>Notifikaatiot</Text></Pressable><Pressable onPress={()=>setTab('sell')} style={s.bottomItem}><View style={s.sellTab}><Text style={s.sellTabText}>＋</Text></View><Text style={tab==='sell'?s.bottomLabelActive:s.bottomLabel}>Uusi ilmoitus</Text></Pressable><Pressable onPress={()=>setTab('messages')} style={s.bottomItem}><Text style={tab==='messages'?s.bottomIconActive:s.bottomIcon}>✉</Text><Text style={tab==='messages'?s.bottomLabelActive:s.bottomLabel}>Viestit</Text></Pressable><Pressable onPress={()=>setTab('profile')} style={s.bottomItem}><Text style={['profile','myListings','favorites'].includes(tab)?s.bottomIconActive:s.bottomIcon}>♙</Text><Text style={['profile','myListings','favorites'].includes(tab)?s.bottomLabelActive:s.bottomLabel}>Oma</Text></Pressable></View>"""
+          if bottom_start < 0 or bottom_end < 0: raise SystemExit('Bottom navigation markers not found')
+          new_bottom="""<View style={s.bottom}><Pressable onPress={()=>setTab('home')} style={s.bottomItem}><Text style={tab==='home'?s.bottomIconActive:s.bottomIcon}>⌂</Text><Text style={tab==='home'?s.bottomLabelActive:s.bottomLabel}>Etusivu</Text></Pressable><Pressable onPress={()=>setTab('notifications')} style={s.bottomItem}><Text style={tab==='notifications'?s.bottomIconActive:s.bottomIcon}>🔔</Text><Text style={tab==='notifications'?s.bottomLabelActive:s.bottomLabel}>Notifikaatiot</Text></Pressable><Pressable onPress={()=>setTab('sell')} style={s.bottomItem}><View style={s.sellTab}><Text style={s.sellTabText}>＋</Text></View><Text style={tab==='sell'?s.bottomLabelActive:s.bottomLabel}>Uusi ilmoitus</Text></Pressable><Pressable onPress={()=>setTab('messages')} style={s.bottomItem}><Text style={tab==='messages'?s.bottomIconActive:s.bottomIcon}>✉</Text><Text style={tab==='messages'?s.bottomLabelActive:s.bottomLabel}>Viestit</Text></Pressable><Pressable onPress={()=>setTab('profile')} style={s.bottomItem}><Text style={['profile','myListings','favorites'].includes(tab)?s.bottomIconActive:s.bottomIcon}>♙</Text><Text style={['profile','myListings','favorites'].includes(tab)?s.bottomLabelActive:s.bottomLabel}>Oma</Text></Pressable></View>"""
           s=s[:bottom_start]+new_bottom+s[bottom_end+len('</View>'):]
-
           replacements={
-            r"quickPanel:\{.*?\},quickItem:":"quickPanel:{marginTop:4,marginHorizontal:8,backgroundColor:'#fff',borderRadius:18,paddingVertical:8,paddingHorizontal:2,flexDirection:'row',flexWrap:'wrap',justifyContent:'flex-start',alignItems:'flex-start',elevation:2},quickItem:",
+            r"bottom:\{[^}]*\}":"bottom:{position:'absolute',left:0,right:0,bottom:0,height:76,backgroundColor:'#fff',borderTopWidth:1,borderColor:'#e5e7eb',flexDirection:'row',alignItems:'center',paddingTop:6,paddingBottom:6,elevation:12}",
+            r"bottomItem:\{[^}]*\}":"bottomItem:{flex:1,height:64,alignItems:'center',justifyContent:'center',gap:2,paddingHorizontal:1}",
+            r"bottomIcon:\{[^}]*\}":"bottomIcon:{fontSize:22,color:'#64748b',lineHeight:26}",
+            r"bottomIconActive:\{[^}]*\}":"bottomIconActive:{fontSize:22,color:'#1565d8',lineHeight:26}",
+            r"bottomLabel:\{[^}]*\}":"bottomLabel:{fontSize:9,color:'#64748b',fontWeight:'600',textAlign:'center'}",
+            r"bottomLabelActive:\{[^}]*\}":"bottomLabelActive:{fontSize:9,color:'#1565d8',fontWeight:'800',textAlign:'center'}",
+            r"sellTab:\{[^}]*\}":"sellTab:{width:48,height:48,borderRadius:24,backgroundColor:'#1565d8',alignItems:'center',justifyContent:'center',marginTop:-18,borderWidth:3,borderColor:'#fff'}",
+            r"sellTabText:\{[^}]*\}":"sellTabText:{color:'#fff',fontSize:28,lineHeight:31}",
             r"quickItem:\{[^}]*\}":"quickItem:{width:'20%',minWidth:'20%',maxWidth:'20%',flexBasis:'20%',flexGrow:0,flexShrink:0,minHeight:82,alignItems:'center',justifyContent:'flex-start',gap:4,paddingVertical:5,paddingHorizontal:1}",
             r"quickIconWrap:\{[^}]*\}":"quickIconWrap:{width:42,height:42,borderRadius:14,alignItems:'center',justifyContent:'center'}",
             r"quickIcon:\{[^}]*\}":"quickIcon:{fontSize:22}",
             r"quickLabel:\{[^}]*\}":"quickLabel:{fontSize:9.2,color:'#53657c',fontWeight:'700',textAlign:'center',lineHeight:11.5}",
             r"marketList:\{[^}]*\}":"marketList:{paddingHorizontal:10,paddingBottom:110,gap:10,flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between'}"
           }
-          for pat,rep in replacements.items():
-              s=re.sub(pat,rep,s,count=1)
-
-          if 'marketGridItem:' not in s:
-              s=s.replace("marketList:{", "marketGridItem:{width:'48.5%'},marketList:{", 1)
-          if 'categoryTitleWrap:' not in s:
-              s=s.replace("popularHead:{", "categoryTitleWrap:{paddingHorizontal:14,paddingTop:10,paddingBottom:2},categoryTitle:{fontSize:20,fontWeight:'900',color:'#0f172a'},popularHead:{")
-          if 'homeSearch:' not in s:
-              s=s.replace("categoryTitleWrap:{", "homeSearch:{marginHorizontal:10,marginTop:8,marginBottom:6,height:46,borderRadius:14,borderWidth:1,borderColor:'#e2e8f0',backgroundColor:'#fff',flexDirection:'row',alignItems:'center',paddingHorizontal:12},homeSearchInput:{flex:1,fontSize:15,color:'#0f172a'},homeSearchIcon:{fontSize:23,color:'#64748b'},categoryTitleWrap:{",1)
-
+          for pat,rep in replacements.items(): s=re.sub(pat,rep,s,count=1)
+          if 'homeSearch:' not in s: s=s.replace("categoryTitleWrap:{", "homeSearch:{marginHorizontal:10,marginTop:8,marginBottom:6,height:46,borderRadius:14,borderWidth:1,borderColor:'#e2e8f0',backgroundColor:'#fff',flexDirection:'row',alignItems:'center',paddingHorizontal:12},homeSearchInput:{flex:1,fontSize:15,color:'#0f172a'},homeSearchIcon:{fontSize:23,color:'#64748b'},categoryTitleWrap:{",1)
           p.write_text(s)
           PY
       - name: Generate Android project
