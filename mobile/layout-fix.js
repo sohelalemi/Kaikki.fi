@@ -6,26 +6,29 @@ StyleSheet.create = (styles) => {
   const next = { ...styles };
 
   // Home categories: force 10 categories into exactly 2 rows (5 + 5).
+  // Keep each tile below 20% so Android rounding/padding can never push
+  // the fifth item onto a third column layout.
   if (next.quickPanel && next.quickItem && next.quickLabel) {
     next.quickPanel = {
       ...next.quickPanel,
-      paddingHorizontal: 4,
-      justifyContent: 'space-between',
+      paddingHorizontal: 2,
+      justifyContent: 'space-around',
+      alignItems: 'flex-start',
     };
     next.quickItem = {
       ...next.quickItem,
-      width: '19%',
-      minWidth: '19%',
-      maxWidth: '19%',
-      flexBasis: '19%',
+      width: '18%',
+      minWidth: '18%',
+      maxWidth: '18%',
+      flexBasis: '18%',
       flexGrow: 0,
       flexShrink: 0,
       paddingHorizontal: 0,
     };
     next.quickLabel = {
       ...next.quickLabel,
-      fontSize: 8.8,
-      lineHeight: 10.5,
+      fontSize: 8.6,
+      lineHeight: 10.2,
     };
   }
 
