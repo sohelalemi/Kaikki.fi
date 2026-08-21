@@ -31,14 +31,10 @@ StyleSheet.create = (styles) => {
   }
 
   // Latest listing images.
-  if (next.marketImage) {
-    next.marketImage = { ...next.marketImage, height: 155 };
-  }
-  if (next.marketImagePlaceholder) {
-    next.marketImagePlaceholder = { ...next.marketImagePlaceholder, height: 155 };
-  }
+  if (next.marketImage) next.marketImage = { ...next.marketImage, height: 155 };
+  if (next.marketImagePlaceholder) next.marketImagePlaceholder = { ...next.marketImagePlaceholder, height: 155 };
 
-  // Actual styles used by App.js on listing cards.
+  // Compact favorite button.
   if (next.favoriteButton) {
     next.favoriteButton = {
       ...next.favoriteButton,
@@ -50,20 +46,40 @@ StyleSheet.create = (styles) => {
       padding: 0,
     };
   }
-  if (next.favoriteIcon) {
-    next.favoriteIcon = {
-      ...next.favoriteIcon,
-      fontSize: 17,
-      lineHeight: 20,
+  if (next.favoriteIcon) next.favoriteIcon = { ...next.favoriteIcon, fontSize: 17, lineHeight: 20 };
+
+  // Compact listing action row. The message button no longer stretches to
+  // fill half the card, and Varaa is about 15% narrower than before.
+  if (next.row) {
+    next.row = {
+      ...next.row,
+      gap: 8,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    };
+  }
+  if (next.secondary) {
+    next.secondary = {
+      ...next.secondary,
+      flex: 0,
+      width: 82,
+      height: 32,
+      minHeight: 32,
+      paddingVertical: 0,
+      paddingHorizontal: 8,
+      borderRadius: 9,
+      alignItems: 'center',
+      justifyContent: 'center',
     };
   }
   if (next.primarySmall) {
     next.primarySmall = {
       ...next.primarySmall,
+      width: 64,
       height: 32,
       minHeight: 32,
       paddingVertical: 0,
-      paddingHorizontal: 12,
+      paddingHorizontal: 8,
       borderRadius: 9,
       alignItems: 'center',
       justifyContent: 'center',
