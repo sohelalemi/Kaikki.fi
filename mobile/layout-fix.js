@@ -40,5 +40,39 @@ StyleSheet.create = (styles) => {
     next.marketImagePlaceholder = { ...next.marketImagePlaceholder, height: 155 };
   }
 
+  // Listing card actions: keep favorite and reservation controls compact.
+  // Match common style-key variants used by the mobile UI so this remains
+  // compatible if the component naming changes slightly.
+  const compactCircle = (style) => ({
+    ...style,
+    width: 38,
+    height: 38,
+    minWidth: 38,
+    minHeight: 38,
+    borderRadius: 19,
+    padding: 0,
+  });
+  const compactReserve = (style) => ({
+    ...style,
+    minHeight: 38,
+    height: 38,
+    paddingVertical: 0,
+    paddingHorizontal: 16,
+    borderRadius: 11,
+  });
+
+  ['favoriteButton','favoriteBtn','heartButton','heartBtn','marketFavorite','marketHeart'].forEach((key) => {
+    if (next[key]) next[key] = compactCircle(next[key]);
+  });
+  ['favoriteIcon','heartIcon'].forEach((key) => {
+    if (next[key]) next[key] = { ...next[key], fontSize: 20 };
+  });
+  ['reserveButton','reserveBtn','reservationButton','marketReserve','marketReserveButton'].forEach((key) => {
+    if (next[key]) next[key] = compactReserve(next[key]);
+  });
+  ['reserveButtonText','reserveText','reservationButtonText','marketReserveText'].forEach((key) => {
+    if (next[key]) next[key] = { ...next[key], fontSize: 14, lineHeight: 18 };
+  });
+
   return originalCreate(next);
 };
