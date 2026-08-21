@@ -1,0 +1,104 @@
+import React,{useRef,useState}from'react';
+import{Animated,Dimensions,Modal,PanResponder,Pressable,StyleSheet,Text,View,Image}from'react-native';
+
+const originalCreateElement=React.createElement.bind(React);
+const {width:SCREEN_W,height:SCREEN_H}=Dimensions.get('window');
+
+function distance(touches){
+  if(!touches||touches.length<2)return 0;
+  const a=touches[0],b=touches[1];
+  const dx=a.pageX-b.pageX,dy=a.pageY-b.pageY;
+  return Math.sqrt(dx*dx+dy*dy);
+}
+
+function ZoomableListingImage(props){
+  const[open,setOpen]=useState(false);
+  const scale=useRef(new Animated.Value(1)).current;
+  const currentScale=useRef(1);
+  const pinchStart=useRef(0);
+  const pinchBase=useRef(1);
+
+  const panResponder=useRef(PanResponder.create({
+    onStartShouldSetPanResponder:()=>true,
+    onMoveShouldSetPanResponder:(e)=>e.nativeEvent.touches?.length>=2,
+    onPanResponderGrant:(e)=>{
+      const d=distance(e.nativeEvent.touches);
+      if(d>0){pinchStart.current=d;pinchBase.current=currentScale.current;}
+    },
+    onPanResponderMove:(e)=>{
+      const d=distance(e.nativeEvent.touches);
+      if(d>0&&pinchStart.current>0){
+        let next=pinchBase.current*(d/pinchStart.current);
+        next=Math.max(1,Math.min(4,next));
+        currentScale.current=next;
+        scale.setValue(next);
+      }
+    },
+    onPanResponderRelease:()=>{
+      if(currentScale.current<1.05){
+        currentScale.current=1;
+        Animated.spring(scale,{toValue:1,useNativeDriver:true}).start();
+      }
+      pinchStart.current=0;
+    },
+  })).current;
+
+  function close(){
+    currentScale.current=1;
+    scale.setValue(1);
+    setOpen(false);
+  }
+
+  return originalCreateElement(
+    React.Fragment,
+    null,
+    originalCreateElement(
+      Pressable,
+      {onPress:()=>setOpen(true)},
+      originalCreateElement(Image,{...props,__listingZoomPatched:true})
+    ),
+    originalCreateElement(
+      Modal,
+      {visible:open,transparent:false,animationType:'fade',onRequestClose:close,statusBarTranslucent:true},
+      originalCreateElement(
+        View,
+        {style:styles.overlay},
+        originalCreateElement(
+          View,
+          {style:styles.zoomArea,...panResponder.panHandlers},
+          originalCreateElement(Animated.Image,{
+            source:props.source,
+            resizeMode:'contain',
+            style:[styles.fullImage,{transform:[{scale}]}],
+          })
+        ),
+        originalCreateElement(
+          Pressable,
+          {onPress:close,style:styles.close,hitSlop:12},
+          originalCreateElement(Text,{style:styles.closeText},'×')
+        ),
+        originalCreateElement(Text,{style:styles.hint},'Zoomaa kahdella sormella')
+      )
+    )
+  );
+}
+
+React.createElement=(type,props,...children)=>{
+  if(type===Image&&!props?.__listingZoomPatched){
+    const flat=StyleSheet.flatten(props?.style)||{};
+    // The listing detail gallery uses a 350 x 300 image style in App.js.
+    if(flat.width===350&&flat.height===300){
+      return originalCreateElement(ZoomableListingImage,props,...children);
+    }
+  }
+  return originalCreateElement(type,props,...children);
+};
+
+const styles=StyleSheet.create({
+  overlay:{flex:1,backgroundColor:'#000',alignItems:'center',justifyContent:'center'},
+  zoomArea:{width:SCREEN_W,height:SCREEN_H,alignItems:'center',justifyContent:'center',overflow:'hidden'},
+  fullImage:{width:SCREEN_W,height:SCREEN_H},
+  close:{position:'absolute',top:38,right:18,width:46,height:46,borderRadius:23,backgroundColor:'rgba(0,0,0,.55)',alignItems:'center',justifyContent:'center'},
+  closeText:{color:'#fff',fontSize:36,lineHeight:40,fontWeight:'400'},
+  hint:{position:'absolute',bottom:32,color:'#fff',fontSize:13,backgroundColor:'rgba(0,0,0,.55)',paddingHorizontal:12,paddingVertical:7,borderRadius:14},
+});
