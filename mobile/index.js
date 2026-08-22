@@ -3,7 +3,6 @@ import './layout-fix';
 import './password-eye-fix';
 import './image-zoom-fix';
 import './oma-diili-fix';
-import './marketplace-upgrades';
 
 const App = require('./App').default;
 
