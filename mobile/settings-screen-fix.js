@@ -1,120 +1,28 @@
 import React,{useEffect,useState}from'react';
-import{Linking,Modal,Pressable,ScrollView,StyleSheet,Switch,Text,View}from'react-native';
+import{Alert,Linking,Modal,Pressable,ScrollView,StyleSheet,Switch,Text,View}from'react-native';
 import AsyncStorage from'@react-native-async-storage/async-storage';
 
 const originalCreateElement=React.createElement.bind(React);
-
-function nodeText(node){
-  if(node===null||node===undefined||node===false)return '';
-  if(typeof node==='string'||typeof node==='number')return String(node);
-  if(Array.isArray(node))return node.map(nodeText).join(' ');
-  return nodeText(node?.props?.children);
-}
-
+function nodeText(node){if(node==null||node===false)return'';if(typeof node==='string'||typeof node==='number')return String(node);if(Array.isArray(node))return node.map(nodeText).join(' ');return nodeText(node?.props?.children)}
+const langs=['Suomi','English','فارسی','Русский'];
+const themes=['Järjestelmän mukaan','Vaalea','Tumma'];
+function Choice({title,items,value,onPick,onClose}){return originalCreateElement(Modal,{transparent:true,visible:true,animationType:'fade',onRequestClose:onClose},originalCreateElement(Pressable,{style:styles.overlay,onPress:onClose},originalCreateElement(View,{style:styles.choice},originalCreateElement(Text,{style:styles.choiceTitle},title),...items.map(x=>originalCreateElement(Pressable,{key:x,style:styles.choiceRow,onPress:()=>{onPick(x);onClose()}},originalCreateElement(Text,{style:[styles.choiceText,x===value&&styles.selected]},x),originalCreateElement(Text,{style:styles.check},x===value?'✓':''))))))}
 function SettingsPressable({originalProps}){
-  const[open,setOpen]=useState(false);
-  const[notifications,setNotifications]=useState(true);
-
-  useEffect(()=>{
-    AsyncStorage.getItem('kaikki.settings.notifications').then(v=>{
-      if(v!==null)setNotifications(v==='true');
-    }).catch(()=>{});
-  },[]);
-
-  async function changeNotifications(value){
-    setNotifications(value);
-    try{await AsyncStorage.setItem('kaikki.settings.notifications',String(value));}catch(e){}
-  }
-
-  return originalCreateElement(
-    React.Fragment,
-    null,
-    originalCreateElement(Pressable,{...originalProps,onPress:()=>setOpen(true),__kaikkiSettingsPatched:true},originalProps.children),
-    originalCreateElement(
-      Modal,
-      {visible:open,animationType:'slide',onRequestClose:()=>setOpen(false)},
-      originalCreateElement(
-        View,{style:styles.page},
-        originalCreateElement(View,{style:styles.header},
-          originalCreateElement(Pressable,{onPress:()=>setOpen(false),style:styles.back},originalCreateElement(Text,{style:styles.backText},'‹')),
-          originalCreateElement(Text,{style:styles.title},'Asetukset'),
-          originalCreateElement(View,{style:styles.back})
-        ),
-        originalCreateElement(ScrollView,{contentContainerStyle:styles.content},
-          originalCreateElement(Text,{style:styles.sectionTitle},'Kaikki.fi'),
-          originalCreateElement(View,{style:styles.card},
-            originalCreateElement(View,{style:styles.row},
-              originalCreateElement(View,{style:styles.rowCopy},
-                originalCreateElement(Text,{style:styles.rowTitle},'Ilmoitukset'),
-                originalCreateElement(Text,{style:styles.rowSub},notifications?'Käytössä':'Pois käytöstä')
-              ),
-              originalCreateElement(Switch,{value:notifications,onValueChange:changeNotifications})
-            ),
-            originalCreateElement(View,{style:styles.divider}),
-            originalCreateElement(View,{style:styles.row},
-              originalCreateElement(View,{style:styles.rowCopy},
-                originalCreateElement(Text,{style:styles.rowTitle},'Kieli'),
-                originalCreateElement(Text,{style:styles.rowSub},'Suomi')
-              )
-            ),
-            originalCreateElement(View,{style:styles.divider}),
-            originalCreateElement(View,{style:styles.row},
-              originalCreateElement(View,{style:styles.rowCopy},
-                originalCreateElement(Text,{style:styles.rowTitle},'Teema'),
-                originalCreateElement(Text,{style:styles.rowSub},'Järjestelmän mukaan')
-              )
-            )
-          ),
-          originalCreateElement(Text,{style:styles.sectionTitle},'Puhelimen asetukset'),
-          originalCreateElement(View,{style:styles.card},
-            originalCreateElement(Pressable,{style:styles.linkRow,onPress:()=>Linking.openSettings().catch(()=>{})},
-              originalCreateElement(View,{style:styles.rowCopy},
-                originalCreateElement(Text,{style:styles.rowTitle},'Sovellusluvat'),
-                originalCreateElement(Text,{style:styles.rowSub},'Kamera, mikrofoni, sijainti ja ilmoitukset')
-              ),
-              originalCreateElement(Text,{style:styles.arrow},'›')
-            )
-          ),
-          originalCreateElement(Text,{style:styles.note},'Ilmoitusvalinta tallennetaan tähän laitteeseen. Androidin järjestelmäluvat avautuvat kohdasta Sovellusluvat.')
-        )
-      )
-    )
-  );
+ const[open,setOpen]=useState(false),[notifications,setNotifications]=useState(true),[messages,setMessages]=useState(true),[reservations,setReservations]=useState(true),[deals,setDeals]=useState(true),[searches,setSearches]=useState(true),[location,setLocation]=useState(true),[phone,setPhone]=useState(false),[city,setCity]=useState(true),[online,setOnline]=useState(false),[language,setLanguage]=useState('Suomi'),[theme,setTheme]=useState('Järjestelmän mukaan'),[choice,setChoice]=useState(null);
+ useEffect(()=>{AsyncStorage.multiGet(['notifications','messages','reservations','deals','searches','location','phone','city','online','language','theme'].map(k=>'kaikki.settings.'+k)).then(rows=>{const o=Object.fromEntries(rows.map(([k,v])=>[k.replace('kaikki.settings.',''),v]));if(o.notifications!==null)setNotifications(o.notifications==='true');if(o.messages!==null)setMessages(o.messages==='true');if(o.reservations!==null)setReservations(o.reservations==='true');if(o.deals!==null)setDeals(o.deals==='true');if(o.searches!==null)setSearches(o.searches==='true');if(o.location!==null)setLocation(o.location==='true');if(o.phone!==null)setPhone(o.phone==='true');if(o.city!==null)setCity(o.city==='true');if(o.online!==null)setOnline(o.online==='true');if(o.language)setLanguage(o.language);if(o.theme)setTheme(o.theme)}).catch(()=>{})},[]);
+ const save=(k,setter)=>(v)=>{setter(v);AsyncStorage.setItem('kaikki.settings.'+k,String(v)).catch(()=>{})};
+ const toggle=(title,sub,value,onChange)=>originalCreateElement(View,{style:styles.row},originalCreateElement(View,{style:styles.rowCopy},originalCreateElement(Text,{style:styles.rowTitle},title),sub&&originalCreateElement(Text,{style:styles.rowSub},sub)),originalCreateElement(Switch,{value,onValueChange:onChange}));
+ const link=(title,sub,onPress)=>originalCreateElement(Pressable,{style:styles.linkRow,onPress},originalCreateElement(View,{style:styles.rowCopy},originalCreateElement(Text,{style:styles.rowTitle},title),sub&&originalCreateElement(Text,{style:styles.rowSub},sub)),originalCreateElement(Text,{style:styles.arrow},'›'));
+ const div=()=>originalCreateElement(View,{style:styles.divider});
+ return originalCreateElement(React.Fragment,null,originalCreateElement(Pressable,{...originalProps,onPress:()=>setOpen(true),__kaikkiSettingsPatched:true},originalProps.children),originalCreateElement(Modal,{visible:open,animationType:'slide',onRequestClose:()=>setOpen(false)},originalCreateElement(View,{style:styles.page},originalCreateElement(View,{style:styles.header},originalCreateElement(Pressable,{onPress:()=>setOpen(false),style:styles.back},originalCreateElement(Text,{style:styles.backText},'‹')),originalCreateElement(Text,{style:styles.title},'Asetukset'),originalCreateElement(View,{style:styles.back})),originalCreateElement(ScrollView,{contentContainerStyle:styles.content},
+ originalCreateElement(Text,{style:styles.sectionTitle},'Kaikki.fi'),originalCreateElement(View,{style:styles.card},toggle('Ilmoitukset',notifications?'Käytössä':'Pois käytöstä',notifications,save('notifications',setNotifications)),div(),link('Kieli',language,()=>setChoice('language')),div(),link('Teema',theme,()=>setChoice('theme'))),
+ originalCreateElement(Text,{style:styles.sectionTitle},'Ilmoitukset'),originalCreateElement(View,{style:styles.card},toggle('Viestit','Uudet viestit',messages,save('messages',setMessages)),div(),toggle('Varaukset','Varausten muutokset',reservations,save('reservations',setReservations)),div(),toggle('Kaikki Diili','Diilin tapahtumat',deals,save('deals',setDeals)),div(),toggle('Hakuvahdit','Tallennettujen hakujen osumat',searches,save('searches',setSearches))),
+ originalCreateElement(Text,{style:styles.sectionTitle},'Yksityisyys'),originalCreateElement(View,{style:styles.card},toggle('Sijainti','Käytä sijaintia sovelluksessa',location,save('location',setLocation)),div(),toggle('Näytä puhelinnumero','Muille käyttäjille',phone,save('phone',setPhone)),div(),toggle('Näytä kaupunki','Profiilissa ja ilmoituksissa',city,save('city',setCity)),div(),toggle('Online-tila','Näytä milloin olet paikalla',online,save('online',setOnline))),
+ originalCreateElement(Text,{style:styles.sectionTitle},'Turvallisuus ja tili'),originalCreateElement(View,{style:styles.card},link('Vaihda salasana','Päivitä tilisi salasana',()=>Alert.alert('Vaihda salasana','Salasanan vaihto yhdistetään seuraavaksi kirjautumistiliin.')),div(),link('Kirjaudu ulos kaikilta laitteilta','Suojaa tiliäsi',()=>Alert.alert('Kirjaudu ulos','Haluatko kirjautua ulos kaikilta laitteilta?',[{text:'Peruuta',style:'cancel'},{text:'Jatka',onPress:()=>Alert.alert('Turvallisuus','Toiminto yhdistetään seuraavaksi käyttäjätiliin.')}])) ,div(),link('Muokkaa tiliä','Nimi, puhelin ja kaupunki',()=>Alert.alert('Muokkaa tiliä','Tilin tietojen muokkaus avataan profiilista.')),div(),link('Poista tili','Poista tili ja omat tiedot',()=>Alert.alert('Poista tili','Tilin poistaminen on pysyvä toiminto. Varsinainen poistopainike aktivoidaan, kun palvelinpuolen poisto on valmis.'))),
+ originalCreateElement(Text,{style:styles.sectionTitle},'Puhelimen asetukset'),originalCreateElement(View,{style:styles.card},link('Sovellusluvat','Kamera, mikrofoni, sijainti ja ilmoitukset',()=>Linking.openSettings().catch(()=>{}))),
+ originalCreateElement(Text,{style:styles.sectionTitle},'Tietoja'),originalCreateElement(View,{style:styles.card},link('Tietoja sovelluksesta','Kaikki.fi',()=>Alert.alert('Kaikki.fi','Osta, myy ja löydä.')),div(),link('Käyttöehdot','Palvelun käyttöehdot',()=>Alert.alert('Käyttöehdot','Käyttöehtosivu lisätään ennen julkaisua.')),div(),link('Tietosuojaseloste','Miten tietojasi käsitellään',()=>Alert.alert('Tietosuoja','Tietosuojaseloste lisätään ennen julkaisua.')))
+ )),choice==='language'&&originalCreateElement(Choice,{title:'Kieli',items:langs,value:language,onPick:v=>{setLanguage(v);AsyncStorage.setItem('kaikki.settings.language',v).catch(()=>{})},onClose:()=>setChoice(null)}),choice==='theme'&&originalCreateElement(Choice,{title:'Teema',items:themes,value:theme,onPick:v=>{setTheme(v);AsyncStorage.setItem('kaikki.settings.theme',v).catch(()=>{})},onClose:()=>setChoice(null)}))));
 }
-
-function shouldPatch(type,props){
-  if(type!==Pressable||props?.__kaikkiSettingsPatched)return false;
-  const text=nodeText(props?.children).trim();
-  return text.includes('Asetukset')&&text.includes('›');
-}
-
-try{
-  const runtime=require('react/jsx-runtime');
-  const originalJsx=runtime.jsx;
-  const originalJsxs=runtime.jsxs;
-  const wrap=(original,type,props,key)=>{
-    if(shouldPatch(type,props))return original(SettingsPressable,{originalProps:props},key);
-    return original(type,props,key);
-  };
-  if(typeof originalJsx==='function')runtime.jsx=(type,props,key)=>wrap(originalJsx,type,props,key);
-  if(typeof originalJsxs==='function')runtime.jsxs=(type,props,key)=>wrap(originalJsxs,type,props,key);
-}catch(e){console.warn('settings screen patch',e?.message||e)}
-
-const styles=StyleSheet.create({
-  page:{flex:1,backgroundColor:'#f7f8fa',paddingTop:36},
-  header:{height:62,backgroundColor:'#fff',flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:12,borderBottomWidth:1,borderBottomColor:'#e5e7eb'},
-  back:{width:46,height:46,alignItems:'center',justifyContent:'center'},
-  backText:{fontSize:38,lineHeight:40,color:'#1565d8'},
-  title:{fontSize:21,fontWeight:'900',color:'#111827'},
-  content:{padding:16,paddingBottom:50},
-  sectionTitle:{fontSize:14,fontWeight:'800',color:'#64748b',marginTop:14,marginBottom:8,marginLeft:4},
-  card:{backgroundColor:'#fff',borderRadius:16,overflow:'hidden',borderWidth:1,borderColor:'#e8ebef'},
-  row:{minHeight:70,flexDirection:'row',alignItems:'center',paddingHorizontal:16},
-  linkRow:{minHeight:76,flexDirection:'row',alignItems:'center',paddingHorizontal:16},
-  rowCopy:{flex:1},
-  rowTitle:{fontSize:17,fontWeight:'700',color:'#111827'},
-  rowSub:{fontSize:13,color:'#64748b',marginTop:3},
-  divider:{height:1,backgroundColor:'#eceff3',marginLeft:16},
-  arrow:{fontSize:31,color:'#b7bcc5'},
-  note:{fontSize:12.5,lineHeight:18,color:'#64748b',paddingHorizontal:4,marginTop:12}
-});
+function shouldPatch(type,props){if(type!==Pressable||props?.__kaikkiSettingsPatched)return false;const text=nodeText(props?.children).trim();return text.includes('Asetukset')&&text.includes('›')}
+try{const runtime=require('react/jsx-runtime'),oj=runtime.jsx,os=runtime.jsxs;const wrap=(o,t,p,k)=>shouldPatch(t,p)?o(SettingsPressable,{originalProps:p},k):o(t,p,k);if(typeof oj==='function')runtime.jsx=(t,p,k)=>wrap(oj,t,p,k);if(typeof os==='function')runtime.jsxs=(t,p,k)=>wrap(os,t,p,k)}catch(e){console.warn('settings screen patch',e?.message||e)}
+const styles=StyleSheet.create({page:{flex:1,backgroundColor:'#f7f8fa',paddingTop:36},header:{height:62,backgroundColor:'#fff',flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:12,borderBottomWidth:1,borderBottomColor:'#e5e7eb'},back:{width:46,height:46,alignItems:'center',justifyContent:'center'},backText:{fontSize:38,lineHeight:40,color:'#1565d8'},title:{fontSize:21,fontWeight:'900',color:'#111827'},content:{padding:16,paddingBottom:60},sectionTitle:{fontSize:14,fontWeight:'800',color:'#64748b',marginTop:18,marginBottom:8,marginLeft:4},card:{backgroundColor:'#fff',borderRadius:16,overflow:'hidden',borderWidth:1,borderColor:'#e8ebef'},row:{minHeight:70,flexDirection:'row',alignItems:'center',paddingHorizontal:16},linkRow:{minHeight:70,flexDirection:'row',alignItems:'center',paddingHorizontal:16},rowCopy:{flex:1},rowTitle:{fontSize:16.5,fontWeight:'700',color:'#111827'},rowSub:{fontSize:13,color:'#64748b',marginTop:3},divider:{height:1,backgroundColor:'#eceff3',marginLeft:16},arrow:{fontSize:31,color:'#b7bcc5'},overlay:{flex:1,backgroundColor:'rgba(0,0,0,.35)',justifyContent:'center',padding:28},choice:{backgroundColor:'#fff',borderRadius:18,paddingVertical:10},choiceTitle:{fontSize:20,fontWeight:'900',padding:18,color:'#111827'},choiceRow:{minHeight:56,flexDirection:'row',alignItems:'center',paddingHorizontal:20,borderTopWidth:1,borderTopColor:'#eef0f3'},choiceText:{flex:1,fontSize:17,color:'#111827'},selected:{fontWeight:'800',color:'#1565d8'},check:{fontSize:20,color:'#1565d8'}});
