@@ -1,19 +1,42 @@
-// Temporary stability fix for Android Uusi screen.
-// Some Android builds can terminate when react-native-maps mounts before a
-// working native maps configuration is available. Replace only the native
-// MapView component with a lightweight View so the listing form always opens.
-// Address/city fields and the rest of the listing form continue to work.
-import React from 'react';
-import {View,Text} from 'react-native';
+import React,{useState} from 'react';
+import {View,Text,Pressable} from 'react-native';
 
+// Keep Uusi stable by avoiding a native MapView mount until the user asks for it.
+// The real react-native-maps component is preserved and rendered only after
+// tapping the button below.
 try {
   const maps = require('react-native-maps');
-  const SafeMap = (props) => React.createElement(
-    View,
-    {style:[props?.style,{alignItems:'center',justifyContent:'center',backgroundColor:'#eef2f6'}]},
-    React.createElement(Text,{style:{color:'#64748b',textAlign:'center',padding:16}},'📍 Kartta otetaan käyttöön seuraavassa korjauksessa')
-  );
-  if (maps && maps.default) maps.default = SafeMap;
+  const NativeMap = maps?.default;
+
+  function LazyMap(props){
+    const[open,setOpen]=useState(false);
+
+    if(!open){
+      return React.createElement(
+        View,
+        {style:[props?.style,{alignItems:'center',justifyContent:'center',backgroundColor:'#eef2f6',padding:16}]},
+        React.createElement(Text,{style:{color:'#334155',fontWeight:'800',marginBottom:10}},'📍 Sijainti kartalla'),
+        React.createElement(Text,{style:{color:'#64748b',textAlign:'center',marginBottom:14}},'Kartta avautuu vasta kun painat alla olevaa painiketta.'),
+        React.createElement(
+          Pressable,
+          {onPress:()=>setOpen(true),style:{backgroundColor:'#1565d8',paddingHorizontal:18,paddingVertical:12,borderRadius:12}},
+          React.createElement(Text,{style:{color:'#fff',fontWeight:'900'}},'Näytä kartta')
+        )
+      );
+    }
+
+    if(typeof NativeMap!=='function'&&typeof NativeMap!=='object'){
+      return React.createElement(
+        View,
+        {style:[props?.style,{alignItems:'center',justifyContent:'center',backgroundColor:'#eef2f6',padding:16}]},
+        React.createElement(Text,{style:{color:'#b91c1c',textAlign:'center'}},'Karttaa ei voitu ladata tällä laitteella.')
+      );
+    }
+
+    return React.createElement(NativeMap,props,props?.children);
+  }
+
+  if(maps && maps.default) maps.default = LazyMap;
 } catch (e) {
-  console.warn('map crash fix', e?.message || e);
+  console.warn('lazy map fix', e?.message || e);
 }
