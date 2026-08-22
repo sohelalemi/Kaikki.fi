@@ -9,6 +9,7 @@ let diiliMode=false;
 let suppressReservationSuccess=false;
 let lastDealCreated=false;
 let lastDetailAmount=0;
+let detailRenderContext=false;
 
 function nodeText(node){
   if(node===null||node===undefined||node===false)return '';
@@ -24,10 +25,16 @@ function parseEuro(text){
 function rememberPrice(type,props){
   if(type!==Text)return;
   const flat=StyleSheet.flatten(props?.style)||{};
-  if(flat.fontSize===30&&String(flat.fontWeight)==='900'){
+  const weight=String(flat.fontWeight||'');
+  if(flat.fontSize===30&&weight==='900'){
     const amount=parseEuro(nodeText(props?.children));
     if(amount>0)lastDetailAmount=amount;
+    detailRenderContext=true;
+    return;
   }
+  // Listing cards use the smaller marketplace price style. Reset the context
+  // there so Kaikki Diili is not injected into every card on the home screen.
+  if(flat.fontSize===18&&weight==='900')detailRenderContext=false;
 }
 
 supabase.from=(table)=>{
@@ -65,13 +72,14 @@ function DiiliButton({reservePress}){
   return originalCreateElement(Pressable,{style:styles.diiliButton,onPress:()=>startDiili(reservePress)},originalCreateElement(Text,{style:styles.diiliText},'🛡️ Kaikki Diili'));
 }
 
-// Replace each visible Varaa action with a small stack: original Varaa + Kaikki Diili.
-// This is more reliable than trying to patch the parent action row.
+// Add Kaikki Diili only beside the Varaa action inside the listing detail view.
+// Home/favorites cards keep their compact Viesti + Varaa layout.
 function patchElement(original,type,props,key){
   rememberPrice(type,props);
-  if(type===Pressable&&!props?.__kaikkiDiiliOriginal&&typeof props?.onPress==='function'&&nodeText(props?.children).trim()==='Varaa'){
+  if(detailRenderContext&&type===Pressable&&!props?.__kaikkiDiiliOriginal&&typeof props?.onPress==='function'&&nodeText(props?.children).trim()==='Varaa'){
     const originalButton=original(Pressable,{...props,__kaikkiDiiliOriginal:true},key?`${key}-varaa`:undefined);
     const diili=original(DiiliButton,{reservePress:props.onPress},key?`${key}-diili`:undefined);
+    detailRenderContext=false;
     return original(View,{style:styles.stack,children:[originalButton,diili]},key);
   }
   return original(type,props,key);
@@ -79,8 +87,8 @@ function patchElement(original,type,props,key){
 
 React.createElement=(type,props,...children)=>{
   rememberPrice(type,props);
-  const nextProps={...(props||{}),children:children.length<=1?children[0]:children};
-  if(type===Pressable&&!props?.__kaikkiDiiliOriginal&&typeof props?.onPress==='function'&&nodeText(children).trim()==='Varaa'){
+  if(detailRenderContext&&type===Pressable&&!props?.__kaikkiDiiliOriginal&&typeof props?.onPress==='function'&&nodeText(children).trim()==='Varaa'){
+    detailRenderContext=false;
     return originalCreateElement(View,{style:styles.stack},
       originalCreateElement(Pressable,{...props,__kaikkiDiiliOriginal:true},...children),
       originalCreateElement(DiiliButton,{reservePress:props.onPress})
