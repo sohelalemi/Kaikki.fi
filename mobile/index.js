@@ -3,6 +3,7 @@ import './layout-fix';
 import './password-eye-fix';
 import './image-zoom-fix';
 import './oma-diili-fix';
+import './map-crash-fix';
 
 const App = require('./App').default;
 
