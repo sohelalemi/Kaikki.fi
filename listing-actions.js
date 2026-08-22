@@ -4,14 +4,14 @@
 
   const style = document.createElement('style');
   style.textContent = `
-    .listing-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+    .listing-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
     .listing-actions button{width:100%;margin:0}
     .listing-message{background:#eef4ff;color:#1565d8}
     .listing-reserve{background:#1565d8;color:#fff}
     .listing-diili{background:#0f766e;color:#fff;font-weight:800}
     .detail-listing-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
     .detail-listing-actions button{width:100%}
-    @media(max-width:620px){.listing-actions,.detail-listing-actions{grid-template-columns:1fr 1fr}.listing-diili{grid-column:1/-1}}
+    @media(max-width:620px){.detail-listing-actions{grid-template-columns:1fr 1fr}.detail-listing-actions .listing-diili{grid-column:1/-1}}
   `;
   document.head.appendChild(style);
 
@@ -130,7 +130,7 @@
       const reserve = document.createElement('button');
       reserve.type = 'button'; reserve.className = 'listing-reserve'; reserve.textContent = 'Varaa';
       reserve.onclick = e => { e.stopPropagation(); reserveListing(listing); };
-      wrap.append(msg,reserve,makeDiiliButton(listing));
+      wrap.append(msg,reserve);
       body.appendChild(wrap);
     });
   }
