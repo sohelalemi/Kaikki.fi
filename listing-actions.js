@@ -4,13 +4,14 @@
 
   const style = document.createElement('style');
   style.textContent = `
-    .listing-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+    .listing-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
     .listing-actions button{width:100%;margin:0}
     .listing-message{background:#eef4ff;color:#1565d8}
     .listing-reserve{background:#1565d8;color:#fff}
-    .detail-listing-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+    .listing-diili{background:#0f766e;color:#fff;font-weight:800}
+    .detail-listing-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
     .detail-listing-actions button{width:100%}
-    @media(max-width:520px){.listing-actions,.detail-listing-actions{grid-template-columns:1fr 1fr}}
+    @media(max-width:620px){.listing-actions,.detail-listing-actions{grid-template-columns:1fr 1fr}.listing-diili{grid-column:1/-1}}
   `;
   document.head.appendChild(style);
 
@@ -26,12 +27,16 @@
     return null;
   }
 
+  function realListingId(listing){
+    return Number(listing?.dbId || String(listing?.id || '').replace(/^db-/,''));
+  }
+
   async function reserveListing(listing){
     try {
       const session = await requireSession();
       if (!session) return;
       const sellerId = listing?.ownerId;
-      const listingId = Number(listing?.dbId || String(listing?.id || '').replace(/^db-/,''));
+      const listingId = realListingId(listing);
       if (!sellerId || !Number.isFinite(listingId)) {
         alert('Tälle demoilmoitukselle ei voi vielä tehdä varausta.');
         return;
@@ -65,6 +70,33 @@
     }
   }
 
+  async function createDiili(listing,button){
+    try {
+      const session=await requireSession();
+      if(!session)return;
+      const listingId=realListingId(listing);
+      const sellerId=listing?.ownerId;
+      if(!sellerId||!Number.isFinite(listingId)){
+        alert('Kaikki Diili toimii vain verkkopalveluun tallennetuissa ilmoituksissa.');
+        return;
+      }
+      if(sellerId===session.user.id){
+        alert('Et voi tehdä Kaikki Diiliä omasta ilmoituksestasi.');
+        return;
+      }
+      const old=button?.textContent;
+      if(button){button.disabled=true;button.textContent='Lähetetään…';}
+      const {error}=await B.client.rpc('create_deal',{p_listing_id:listingId});
+      if(error)throw error;
+      if(button)button.textContent='✓ Diili lähetetty';
+      alert('Kaikki Diili -pyyntö lähetettiin myyjälle.');
+      setTimeout(()=>{if(button){button.disabled=false;button.textContent=old||'🛡️ Kaikki Diili';}},1800);
+    }catch(e){
+      if(button){button.disabled=false;button.textContent='🛡️ Kaikki Diili';}
+      alert(e?.message||'Kaikki Diili -pyyntöä ei voitu lähettää.');
+    }
+  }
+
   async function messageListing(listing){
     if (!listing) return;
     if (window.KaikkiMessages?.open) {
@@ -72,6 +104,15 @@
       return;
     }
     alert('Viestit eivät ole vielä käytettävissä.');
+  }
+
+  function makeDiiliButton(listing){
+    const diili=document.createElement('button');
+    diili.type='button';
+    diili.className='listing-diili';
+    diili.textContent='🛡️ Kaikki Diili';
+    diili.onclick=e=>{e?.stopPropagation?.();createDiili(listing,diili);};
+    return diili;
   }
 
   function addCardActions(){
@@ -89,7 +130,7 @@
       const reserve = document.createElement('button');
       reserve.type = 'button'; reserve.className = 'listing-reserve'; reserve.textContent = 'Varaa';
       reserve.onclick = e => { e.stopPropagation(); reserveListing(listing); };
-      wrap.append(msg,reserve);
+      wrap.append(msg,reserve,makeDiiliButton(listing));
       body.appendChild(wrap);
     });
   }
@@ -104,8 +145,6 @@
     try { listing = items.find(x => x.t === title); } catch {}
     if (!listing) return;
 
-    // details-enhancer already creates contact/reserve controls. Hide both so
-    // this module can render one consistent Viesti + Varaa action row only.
     const oldContact = content.querySelector('#contactBtn');
     const oldReserve = content.querySelector('#reserveBtn');
     if (oldContact) oldContact.style.display = 'none';
@@ -123,7 +162,7 @@
     const reserve=document.createElement('button');
     reserve.type='button'; reserve.className='listing-reserve'; reserve.textContent='Varaa';
     reserve.onclick=()=>reserveListing(listing);
-    wrap.append(msg,reserve);
+    wrap.append(msg,reserve,makeDiiliButton(listing));
     content.appendChild(wrap);
   }
 
