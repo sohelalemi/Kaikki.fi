@@ -5,18 +5,9 @@ const originalCreate = StyleSheet.create.bind(StyleSheet);
 StyleSheet.create = (styles) => {
   const next = { ...styles };
 
-  // Keep normal text inputs at a fixed single-line height. This prevents
-  // the login password field from growing vertically after paste on Android.
-  if (next.input) {
-    next.input = {
-      ...next.input,
-      height: 52,
-      minHeight: 52,
-      maxHeight: 52,
-      paddingVertical: 0,
-      textAlignVertical: 'center',
-    };
-  }
+  // Do not override every style named "input" globally. The Uusi form uses
+  // several different text inputs, including multiline fields. The login
+  // password field already has its own fixed-height styling in password-eye-fix.
 
   // Home categories: force 10 categories into exactly 2 rows (5 + 5).
   if (next.quickPanel && next.quickItem && next.quickLabel) {
