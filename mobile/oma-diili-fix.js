@@ -36,7 +36,6 @@ function KaikkiDiiliRow(){
     originalCreateElement(Text,{style:styles.section},'Turvallisempi kaupankäynti'),originalCreateElement(View,{style:styles.info},originalCreateElement(Text,{style:styles.infoTitle},'Kaikki Diili'),originalCreateElement(Text,{style:styles.infoText},'✓ Ostajan ja myyjän oma tapahtumanäkymä\n✓ Myyjä hyväksyy Diilin\n✓ Maksu vahvistetaan vain maksupalvelusta\n✓ Lähetys ja vastaanotto vahvistetaan erikseen'),originalCreateElement(Text,{style:styles.learn},'Maksupalvelu liitetään erikseen ennen oikeita rahansiirtoja.')))
    )
   ))
- )
 }
 function isExactProfileMainMenu(type,props,children){if(type!==View||props?.__kaikkiOmaDiiliPatched)return false;const direct=(children||[]).filter(Boolean).map(nodeText);if(direct.length<5||direct.length>7)return false;const text=direct.join(' ');if(text.includes('Asetukset')||text.includes('Yksityisyys')||text.includes('Asiakastuki')||text.includes('Kirjaudu ulos'))return false;return text.includes('Omat ilmoitukset')&&text.includes('Hakuvahdit')&&text.includes('Suosikit')&&text.includes('Varaukset')&&text.includes('Arvostelut')&&text.includes('Seuraajat')}
 function maybeCaptureNewListing(type,props){if(type!==Pressable||typeof props?.onPress!=='function')return;const text=nodeText(props?.children).trim();if(text==='Uusi'||text==='Uusi ilmoitus'||text.includes('Uusi ilmoitus'))openNewListing=props.onPress}
