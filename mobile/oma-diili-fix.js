@@ -77,26 +77,24 @@ function KaikkiDiiliRow(){
   );
 }
 
-function shouldPatchProfileMenu(type,props,children){
+function isExactProfileMainMenu(type,props,children){
   if(type!==View||props?.__kaikkiOmaDiiliPatched)return false;
-  const text=(children||[]).map(nodeText).join(' ');
-  return text.includes('Omat ilmoitukset')&&text.includes('Hakuvahdit')&&text.includes('Suosikit')&&text.includes('Varaukset');
+  const direct=(children||[]).filter(Boolean).map(nodeText);
+  if(direct.length<5||direct.length>7)return false;
+  const text=direct.join(' ');
+  if(text.includes('Asetukset')||text.includes('Yksityisyys')||text.includes('Asiakastuki')||text.includes('Kirjaudu ulos'))return false;
+  return text.includes('Omat ilmoitukset')&&text.includes('Hakuvahdit')&&text.includes('Suosikit')&&text.includes('Varaukset')&&text.includes('Arvostelut')&&text.includes('Seuraajat');
 }
 
-function patch(type,props,children,creator){
-  if(!shouldPatchProfileMenu(type,props,children))return creator();
-  return originalCreateElement(View,{...props,__kaikkiOmaDiiliPatched:true},...children,originalCreateElement(KaikkiDiiliRow,{key:'kaikki-diili-oma'}));
-}
-
-React.createElement=(type,props,...children)=>patch(type,props,children,()=>originalCreateElement(type,props,...children));
-
+// Patch only the automatic JSX runtime. Patching React.createElement as well caused
+// the same row to be injected twice in release builds.
 try{
   const runtime=require('react/jsx-runtime');
   const originalJsx=runtime.jsx;
   const originalJsxs=runtime.jsxs;
   const wrap=(original,type,props,key)=>{
     const children=Array.isArray(props?.children)?props.children:[props?.children].filter(Boolean);
-    if(shouldPatchProfileMenu(type,props,children)){
+    if(isExactProfileMainMenu(type,props,children)){
       return original(View,{...props,__kaikkiOmaDiiliPatched:true,children:[...children,originalJsx(KaikkiDiiliRow,{},'kaikki-diili-oma')]},key);
     }
     return original(type,props,key);
