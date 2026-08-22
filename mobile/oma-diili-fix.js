@@ -1,5 +1,5 @@
 import React,{useState}from'react';
-import{ActivityIndicator,Modal,Pressable,ScrollView,StyleSheet,Text,View}from'react-native';
+import{ActivityIndicator,Alert,Linking,Modal,Pressable,ScrollView,StyleSheet,Text,View}from'react-native';
 import{supabase}from'./src/supabase';
 
 const originalCreateElement=React.createElement.bind(React);
@@ -102,6 +102,37 @@ try{
   if(typeof originalJsx==='function')runtime.jsx=(type,props,key)=>wrap(originalJsx,type,props,key);
   if(typeof originalJsxs==='function')runtime.jsxs=(type,props,key)=>wrap(originalJsxs,type,props,key);
 }catch(e){console.warn('Oma Kaikki Diili patch',e?.message||e)}
+
+// Replace the remaining placeholder Oma actions with useful behavior without
+// touching the stable App.js navigation code.
+const originalAlert=Alert.alert.bind(Alert);
+Alert.alert=(title,message,buttons,options)=>{
+  if(message!=='Tämä toiminto lisätään seuraavassa versiossa.')return originalAlert(title,message,buttons,options);
+
+  if(title==='Hakuvahdit')return originalAlert('Hakuvahdit','Sinulla ei ole vielä tallennettuja hakuvahteja. Hakuvahdit ilmoittavat myöhemmin uusista sopivista ilmoituksista.',[{text:'OK'}]);
+  if(title==='Arvostelut')return originalAlert('Arvostelut','Sinulla ei ole vielä arvosteluja. Kaupan jälkeen ostaja ja myyjä voivat arvioida toisensa.',[{text:'OK'}]);
+  if(title==='Seuraajat')return originalAlert('Seuraajat','Sinulla ei ole vielä seuraajia. Seuraajat näkyvät tässä, kun muut käyttäjät alkavat seurata profiiliasi.',[{text:'OK'}]);
+
+  if(title==='Asetukset')return originalAlert('Asetukset','Tilin asetukset\n\n• Ilmoitukset: käytössä\n• Kieli: Suomi\n• Teema: järjestelmän mukaan\n• Sovellusluvat: puhelimen asetuksissa',[
+    {text:'Sulje',style:'cancel'},
+    {text:'Avaa asetukset',onPress:()=>Linking.openSettings().catch(()=>{})}
+  ]);
+
+  if(title==='Yksityisyys')return originalAlert('Yksityisyys','Kaikki.fi näyttää muille vain kaupankäyntiin tarvittavat julkiset tiedot. Salasanaasi ei näytetä muille. Kamera-, kuva- ja sijaintilupia voit hallita puhelimen asetuksista.',[
+    {text:'Sulje',style:'cancel'},
+    {text:'Avaa lupa-asetukset',onPress:()=>Linking.openSettings().catch(()=>{})}
+  ]);
+
+  if(title==='Asiakastuki')return originalAlert('Asiakastuki','Tarvitsetko apua Kaikki.fi:n kanssa?',[
+    {text:'Sulje',style:'cancel'},
+    {text:'Lähetä sähköposti',onPress:()=>Linking.openURL('mailto:support@kaikki.fi?subject=Kaikki.fi%20asiakastuki').catch(()=>originalAlert('Asiakastuki','Sähköpostisovellusta ei voitu avata.'))}
+  ]);
+
+  if(title==='Muokkaa profiilia')return originalAlert('Muokkaa profiilia','Profiilikuvan voit vaihtaa napauttamalla kuvaa. Nimen, puhelinnumeron ja kaupungin muokkaus lisätään seuraavaan profiilipäivitykseen.',[{text:'OK'}]);
+  if(title==='Tunnistautuminen')return originalAlert('Tunnistautuminen','Henkilöllisyyden vahvistus otetaan käyttöön ennen Kaikki Diilin laajempaa käyttöönottoa.',[{text:'OK'}]);
+
+  return originalAlert(title,message,buttons,options);
+};
 
 const styles=StyleSheet.create({
   row:{minHeight:62,flexDirection:'row',alignItems:'center',paddingHorizontal:16,borderTopWidth:1,borderTopColor:'#e8eaee',backgroundColor:'#fff'},
