@@ -1,0 +1,99 @@
+name: iOS CI
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ios-build]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/ios-ci.yml'
+
+jobs:
+  build-ios-simulator:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Create app icon PNG
+        run: |
+          python3 -m pip install --quiet cairosvg
+          python3 - <<'PY'
+          import cairosvg
+          cairosvg.svg2png(url='assets/kaikki-icon.svg', write_to='assets/kaikki-icon.png', output_width=1024, output_height=1024)
+          PY
+
+      - name: Validate iOS JavaScript bundle
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-key
+        run: npx expo export --platform ios --output-dir dist-ios
+
+      - name: Generate native iOS project
+        env:
+          CI: '1'
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install
+
+      - name: Build iOS Simulator app
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-key
+        run: |
+          set -euo pipefail
+          WORKSPACE=$(find ios -maxdepth 2 -name '*.xcworkspace' ! -path '*/Pods/*' | head -n 1)
+          if [ -z "$WORKSPACE" ]; then
+            echo 'No Xcode workspace found'
+            exit 1
+          fi
+          SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list -json | python3 -c "import json,sys; d=json.load(sys.stdin); s=d.get('workspace',{}).get('schemes',[]); print(next((x for x in s if x.lower()!='pods' and not x.startswith('Pods-')), s[0] if s else ''))")
+          if [ -z "$SCHEME" ]; then
+            echo 'No Xcode scheme found'
+            exit 1
+          fi
+          echo "Workspace: $WORKSPACE"
+          echo "Scheme: $SCHEME"
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            -derivedDataPath build-ios \
+            build
+
+      - name: Package simulator app
+        run: |
+          set -euo pipefail
+          APP=$(find build-ios/Build/Products -type d -name '*.app' | head -n 1)
+          if [ -z "$APP" ]; then
+            echo 'No .app bundle found'
+            exit 1
+          fi
+          ditto -c -k --sequesterRsrc --keepParent "$APP" Kaikki-fi-iOS-Simulator.zip
+
+      - name: Upload iOS simulator build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kaikki-fi-iOS-Simulator
+          path: mobile/Kaikki-fi-iOS-Simulator.zip
+          if-no-files-found: error
