@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate-ios:
+  build-ios:
     runs-on: macos-latest
     defaults:
       run:
@@ -20,4 +20,27 @@ jobs:
         with:
           node-version: '22'
       - run: npm install
-      - run: npx expo export --platform ios --output-dir dist-ios
+      - name: Generate native iOS project
+        run: npx expo prebuild --platform ios --non-interactive
+      - name: Install CocoaPods
+        run: npx pod-install ios
+      - name: Build iOS Simulator app
+        run: |
+          xcodebuild \
+            -workspace ios/*.xcworkspace \
+            -scheme Kaikkifi \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Package app
+        run: |
+          APP_PATH=$(find build/Build/Products/Release-iphonesimulator -maxdepth 1 -name '*.app' -type d | head -1)
+          test -n "$APP_PATH"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" kaikki-ios-simulator.zip
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaikki-ios-simulator
+          path: ios-app/kaikki-ios-simulator.zip
+          if-no-files-found: error
