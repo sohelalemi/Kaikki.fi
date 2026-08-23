@@ -5,6 +5,7 @@ import './image-zoom-fix';
 import './oma-diili-v2';
 import './settings-screen-fix';
 import './map-crash-fix';
+import './identity-verification';
 
 const App = require('./App').default;
 
