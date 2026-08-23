@@ -29,8 +29,10 @@ jobs:
 
       - name: Create app icon PNG
         run: |
-          python3 -m pip install --quiet cairosvg
-          python3 - <<'PY'
+          python3 -m venv .ci-venv
+          . .ci-venv/bin/activate
+          python -m pip install --quiet cairosvg
+          python - <<'PY'
           import cairosvg
           cairosvg.svg2png(url='assets/kaikki-icon.svg', write_to='assets/kaikki-icon.png', output_width=1024, output_height=1024)
           PY
