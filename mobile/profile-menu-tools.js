@@ -1,0 +1,97 @@
+import React,{useState}from'react';
+import{Alert,Modal,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,TextInput,View}from'react-native';
+
+const originalCreateElement=React.createElement.bind(React);
+const targets=new Set(['Hakuvahdit','Arvostelut','Seuraajat','Yksityisyys','Asiakastuki']);
+
+function nodeText(node){
+  if(node==null||node===false)return'';
+  if(typeof node==='string'||typeof node==='number')return String(node);
+  if(Array.isArray(node))return node.map(nodeText).join(' ');
+  return nodeText(node?.props?.children);
+}
+
+function SwitchRow({label,value,onChange}){
+  return originalCreateElement(Pressable,{style:styles.switchRow,onPress:()=>onChange(!value)},
+    originalCreateElement(Text,{style:styles.switchLabel},label),
+    originalCreateElement(View,{style:[styles.switchTrack,value&&styles.switchTrackOn]},
+      originalCreateElement(View,{style:[styles.switchKnob,value&&styles.switchKnobOn]})
+    )
+  );
+}
+
+function ToolContent({label}){
+  const[watchText,setWatchText]=useState('');
+  const[watches,setWatches]=useState([]);
+  const[showPhone,setShowPhone]=useState(false);
+  const[showCity,setShowCity]=useState(true);
+  const[allowMessages,setAllowMessages]=useState(true);
+
+  if(label==='Hakuvahdit')return originalCreateElement(View,null,
+    originalCreateElement(Text,{style:styles.info},'Tallenna haku ja seuraa uusia ilmoituksia.'),
+    originalCreateElement(TextInput,{style:styles.input,value:watchText,onChangeText:setWatchText,placeholder:'Esim. iPhone 15 Pro Lahti'}),
+    originalCreateElement(Pressable,{style:styles.primary,onPress:()=>{const v=watchText.trim();if(!v)return;setWatches(x=>[v,...x]);setWatchText('');}},originalCreateElement(Text,{style:styles.primaryText},'+ Lisää hakuvahti')),
+    watches.length?originalCreateElement(View,{style:styles.cards},...watches.map((w,i)=>originalCreateElement(View,{key:`${w}-${i}`,style:styles.card},originalCreateElement(Text,{style:styles.cardTitle},'🔎 '+w),originalCreateElement(Pressable,{onPress:()=>setWatches(x=>x.filter((_,n)=>n!==i))},originalCreateElement(Text,{style:styles.remove},'Poista'))))):originalCreateElement(Text,{style:styles.empty},'Ei hakuvahteja vielä.')
+  );
+
+  if(label==='Arvostelut')return originalCreateElement(View,null,
+    originalCreateElement(Text,{style:styles.info},'Täällä näkyvät saamasi ja antamasi arvostelut.'),
+    originalCreateElement(View,{style:styles.emptyBox},originalCreateElement(Text,{style:styles.emptyIcon},'★'),originalCreateElement(Text,{style:styles.emptyTitle},'Ei arvosteluja vielä'),originalCreateElement(Text,{style:styles.empty},'Arvostelut näkyvät täällä onnistuneiden kauppojen jälkeen.'))
+  );
+
+  if(label==='Seuraajat')return originalCreateElement(View,null,
+    originalCreateElement(Text,{style:styles.info},'Täällä näet käyttäjät, jotka seuraavat profiiliasi.'),
+    originalCreateElement(View,{style:styles.emptyBox},originalCreateElement(Text,{style:styles.emptyIcon},'♙'),originalCreateElement(Text,{style:styles.emptyTitle},'Ei seuraajia vielä'))
+  );
+
+  if(label==='Yksityisyys')return originalCreateElement(View,null,
+    originalCreateElement(Text,{style:styles.info},'Valitse, mitä tietoja muut käyttäjät voivat nähdä.'),
+    originalCreateElement(SwitchRow,{label:'Näytä puhelinnumero',value:showPhone,onChange:setShowPhone}),
+    originalCreateElement(SwitchRow,{label:'Näytä kaupunki',value:showCity,onChange:setShowCity}),
+    originalCreateElement(SwitchRow,{label:'Salli viestit muilta käyttäjiltä',value:allowMessages,onChange:setAllowMessages}),
+    originalCreateElement(Text,{style:styles.note},'Asetukset ovat käytössä tässä sovellusversiossa. Palvelintallennus lisätään myöhemmin.')
+  );
+
+  return originalCreateElement(View,null,
+    originalCreateElement(Text,{style:styles.info},'Kaikki.fi tukikeskus'),
+    originalCreateElement(View,{style:styles.card},originalCreateElement(Text,{style:styles.cardTitle},'Miten Kaikki Diili toimii?'),originalCreateElement(Text,{style:styles.cardText},'Ostaja lähettää pyynnön, myyjä hyväksyy sen ja kauppa etenee vaiheittain maksusta toimitukseen.')),
+    originalCreateElement(View,{style:styles.card},originalCreateElement(Text,{style:styles.cardTitle},'Ilmoituksen tai käyttäjän ongelma'),originalCreateElement(Text,{style:styles.cardText},'Avaa kyseinen ilmoitus tai keskustelu ja kerää tarvittavat tiedot ennen yhteydenottoa.')),
+    originalCreateElement(Pressable,{style:styles.secondary,onPress:()=>Alert.alert('Asiakastuki','Tukipyyntölomake liitetään palvelimeen seuraavassa vaiheessa.')},originalCreateElement(Text,{style:styles.secondaryText},'Ota yhteyttä tukeen'))
+  );
+}
+
+function FunctionalProfileRow({rowProps,label}){
+  const[open,setOpen]=useState(false);
+  return originalCreateElement(React.Fragment,null,
+    originalCreateElement(Pressable,{...rowProps,onPress:()=>setOpen(true)},rowProps?.children),
+    originalCreateElement(Modal,{visible:open,animationType:'slide',onRequestClose:()=>setOpen(false)},
+      originalCreateElement(SafeAreaView,{style:styles.page},
+        originalCreateElement(View,{style:styles.header},
+          originalCreateElement(Pressable,{style:styles.back,onPress:()=>setOpen(false)},originalCreateElement(Text,{style:styles.backText},'‹')),
+          originalCreateElement(Text,{style:styles.title},label),
+          originalCreateElement(View,{style:{width:44}})
+        ),
+        originalCreateElement(ScrollView,{contentContainerStyle:styles.content},originalCreateElement(ToolContent,{label}))
+      )
+    )
+  );
+}
+
+function shouldReplace(type,props){
+  if(type!==Pressable)return null;
+  const text=nodeText(props?.children);
+  for(const label of targets)if(text.includes(label))return label;
+  return null;
+}
+
+function patchRuntime(){
+  try{
+    const runtime=require('react/jsx-runtime');
+    const oldJsx=runtime.jsx,oldJsxs=runtime.jsxs;
+    if(typeof oldJsx==='function')runtime.jsx=(t,p,k)=>{const label=shouldReplace(t,p);return label?oldJsx(FunctionalProfileRow,{rowProps:p,label},k):oldJsx(t,p,k)};
+    if(typeof oldJsxs==='function')runtime.jsxs=(t,p,k)=>{const label=shouldReplace(t,p);return label?oldJsx(FunctionalProfileRow,{rowProps:p,label},k):oldJsxs(t,p,k)};
+  }catch(e){console.warn('profile-menu-tools',e?.message||e)}
+}
+patchRuntime();
+
+const styles=StyleSheet.create({page:{flex:1,backgroundColor:'#f7f8fa'},header:{height:64,backgroundColor:'#fff',flexDirection:'row',alignItems:'center',justifyContent:'space-between',borderBottomWidth:1,borderBottomColor:'#e5e7eb'},back:{width:44,height:44,alignItems:'center',justifyContent:'center'},backText:{fontSize:38,color:'#1565d8',lineHeight:40},title:{fontSize:21,fontWeight:'900',color:'#111827'},content:{padding:18,paddingBottom:60},info:{fontSize:15,color:'#475569',lineHeight:21,marginBottom:16},input:{height:52,borderWidth:1,borderColor:'#d7dce3',borderRadius:12,backgroundColor:'#fff',paddingHorizontal:14,fontSize:15},primary:{marginTop:10,backgroundColor:'#1565d8',borderRadius:12,minHeight:48,alignItems:'center',justifyContent:'center'},primaryText:{color:'#fff',fontWeight:'900'},cards:{marginTop:14,gap:10},card:{backgroundColor:'#fff',borderWidth:1,borderColor:'#e5e7eb',borderRadius:14,padding:14,marginTop:10},cardTitle:{fontSize:15,fontWeight:'900',color:'#111827'},cardText:{fontSize:13,color:'#64748b',lineHeight:19,marginTop:6},remove:{color:'#dc2626',fontWeight:'800',marginTop:8},emptyBox:{backgroundColor:'#fff',borderRadius:16,padding:28,alignItems:'center',borderWidth:1,borderColor:'#e5e7eb'},emptyIcon:{fontSize:38,color:'#94a3b8'},emptyTitle:{fontSize:18,fontWeight:'900',color:'#111827',marginTop:8},empty:{color:'#64748b',textAlign:'center',marginTop:7},switchRow:{minHeight:62,backgroundColor:'#fff',borderBottomWidth:1,borderBottomColor:'#e5e7eb',paddingHorizontal:14,flexDirection:'row',alignItems:'center',justifyContent:'space-between'},switchLabel:{fontSize:15,fontWeight:'700',color:'#111827',flex:1,paddingRight:12},switchTrack:{width:50,height:29,borderRadius:15,backgroundColor:'#cbd5e1',padding:3},switchTrackOn:{backgroundColor:'#1565d8'},switchKnob:{width:23,height:23,borderRadius:12,backgroundColor:'#fff'},switchKnobOn:{marginLeft:21},note:{fontSize:12,color:'#64748b',lineHeight:18,marginTop:14},secondary:{marginTop:16,borderWidth:1,borderColor:'#1565d8',borderRadius:12,minHeight:48,alignItems:'center',justifyContent:'center',backgroundColor:'#fff'},secondaryText:{color:'#1565d8',fontWeight:'900'}});
