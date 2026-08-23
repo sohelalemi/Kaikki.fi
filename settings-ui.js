@@ -1,234 +1,26 @@
 (() => {
-  const B = window.KaikkiBackend;
-
-  const style = document.createElement('style');
-  style.textContent = `
-    #accountModal .panel{width:min(760px,calc(100vw - 32px));max-height:min(88vh,860px);overflow-y:auto;padding:28px!important}
-    #accountModal #accountBody{min-width:0}
-    .settings-wrap{margin-top:8px;display:grid;gap:18px}
-    .settings-section{background:#fff;border:1px solid #e6ebf2;border-radius:18px;padding:18px 20px;box-shadow:0 8px 24px rgba(15,23,42,.04)}
-    .settings-section h3{font-size:19px;line-height:1.25;margin:0 0 5px;color:#172033}
-    .settings-section>p{color:#64748b;margin:0 0 16px;font-size:14px;line-height:1.5}
-    .theme-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-    .theme-choice{position:relative;display:flex;align-items:center;gap:10px;border:1px solid #dbe3ee;border-radius:14px;padding:13px 14px;cursor:pointer;background:#f8fafc;min-height:58px}
-    .theme-choice:has(input:checked){border-color:#1565d8;background:#eaf2ff;box-shadow:0 0 0 2px rgba(21,101,216,.08)}
-    .theme-choice input{position:absolute;opacity:0;pointer-events:none}
-    .theme-icon{font-size:22px}.theme-copy{display:flex;flex-direction:column;gap:2px}
-    .theme-copy strong,.setting-copy strong{font-size:14px;color:#1f2937}.theme-copy small,.setting-copy small{font-size:12px;color:#7b8798}
-    .setting-list{border:1px solid #e8edf4;border-radius:14px;overflow:hidden;background:#fff}
-    .setting-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 15px;border-bottom:1px solid #eef2f7;min-height:58px}
-    .setting-row:last-child{border-bottom:0}.setting-copy{min-width:0;flex:1}.setting-copy strong,.setting-copy small{display:block}
-    .settings-link{background:#eef4ff!important;color:#1565d8!important;border:0!important;border-radius:10px!important;padding:9px 14px!important;min-width:74px;font-weight:800!important}
-    .switch{position:relative;width:48px;height:28px;flex:0 0 48px}.switch input{opacity:0;width:0;height:0}
-    .slider{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;cursor:pointer;transition:.2s}
-    .slider:before{content:'';position:absolute;width:22px;height:22px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.18)}
-    .switch input:checked+.slider{background:#1565d8}.switch input:checked+.slider:before{transform:translateX(20px)}
-    .settings-saved{font-size:12px;color:#15803d;min-height:18px;margin-top:8px}
-    .settings-error{color:#b91c1c!important}
-    .settings-page{padding:4px 2px 18px}.settings-page-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-    .settings-back{border:0!important;background:#eef4ff!important;color:#1565d8!important;border-radius:10px!important;padding:9px 12px!important;font-weight:800!important}
-    .settings-page h2{margin:0;color:#172033}.settings-page-card{border:1px solid #e6ebf2;border-radius:16px;padding:20px;background:#fff}
-    .settings-page-card h3{margin:18px 0 6px;color:#172033}.settings-page-card h3:first-child{margin-top:0}
-    .settings-page-card p,.settings-page-card li{color:#526173;line-height:1.65}
-    .support-form{display:grid;gap:12px}.support-form label{display:grid;gap:5px;font-weight:700;color:#334155}
-    .support-form input,.support-form textarea{width:100%;box-sizing:border-box}.support-form textarea{min-height:120px;resize:vertical}
-    .support-send{background:#1565d8!important;color:#fff!important;border:0!important;border-radius:11px!important;padding:12px 16px!important;font-weight:800!important}
-    .support-history{margin-top:20px;display:grid;gap:8px}.support-history-row{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#f8fafc}
-    .support-history-row strong{display:block}.support-history-row small{color:#64748b;display:block;margin-top:3px}
-    .cookie-row{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:14px 0;border-bottom:1px solid #eef2f7}.cookie-row:last-child{border:0}
-    body.kaikki-dark{background:#0f172a;color:#f8fafc}
-    body.kaikki-dark header,body.kaikki-dark .panel,body.kaikki-dark section{background:#111827;color:#f8fafc}
-    body.kaikki-dark .settings-section,body.kaikki-dark .setting-list,body.kaikki-dark .setting-row,body.kaikki-dark .settings-page-card,body.kaikki-dark .support-history-row{background:#172033;border-color:#2a3649}
-    body.kaikki-dark .settings-section h3,body.kaikki-dark .setting-copy strong,body.kaikki-dark .theme-copy strong,body.kaikki-dark .settings-page h2,body.kaikki-dark .settings-page-card h3{color:#f8fafc}
-    body.kaikki-dark .settings-section>p,body.kaikki-dark .setting-copy small,body.kaikki-dark .theme-copy small,body.kaikki-dark .settings-page-card p,body.kaikki-dark .settings-page-card li{color:#b9c4d4}
-    body.kaikki-dark .theme-choice{background:#111827;border-color:#334155}
-    body.kaikki-dark .theme-choice:has(input:checked){background:#17315e;border-color:#4f8cf7}
-    body.kaikki-dark input,body.kaikki-dark select,body.kaikki-dark textarea{background:#1f2937;color:#fff;border-color:#374151}
-    @media(max-width:640px){#accountModal .panel{width:calc(100vw - 16px);padding:18px!important}.theme-options{grid-template-columns:1fr}.settings-section{padding:16px}.setting-row{padding:13px 12px}}
-  `;
-  document.head.appendChild(style);
-
-  function applyTheme(theme){
-    const dark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-    document.body.classList.toggle('kaikki-dark', dark);
-    localStorage.setItem('kaikki-theme', theme);
-  }
-
-  applyTheme(localStorage.getItem('kaikki-theme') || 'system');
-  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
-    if ((localStorage.getItem('kaikki-theme') || 'system') === 'system') applyTheme('system');
-  });
-
-  const pref = (key, def = true) => localStorage.getItem(key) == null ? def : localStorage.getItem(key) !== 'off';
-  const savePref = (key, on) => localStorage.setItem(key, on ? 'on' : 'off');
-  const pageShell = (title, html) => `<div class="settings-page"><div class="settings-page-head"><button type="button" class="settings-back">← Takaisin</button><h2>${title}</h2></div><div class="settings-page-card">${html}</div></div>`;
-  const bindBack = body => body.querySelector('.settings-back')?.addEventListener('click', renderSettings);
-
-  async function loadSupportHistory(body){
-    const host = body.querySelector('#supportHistory');
-    if (!host || !B?.client) return;
-    try {
-      const session = await B.session();
-      if (!session) return;
-      const {data,error} = await B.client.from('support_requests').select('id,subject,status,created_at').order('created_at',{ascending:false}).limit(5);
-      if (error) throw error;
-      if (!data?.length) { host.innerHTML = '<p>Ei aiempia tukipyyntöjä.</p>'; return; }
-      host.innerHTML = data.map(x => `<div class="support-history-row"><strong>${escapeHtml(x.subject)}</strong><small>${new Date(x.created_at).toLocaleString('fi-FI')} · ${escapeHtml(x.status)}</small></div>`).join('');
-    } catch {
-      host.innerHTML = '<p>Aiemmat tukipyynnöt eivät latautuneet.</p>';
-    }
-  }
-
-  function escapeHtml(value=''){
-    return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  }
-
-  async function openSupport(){
-    const body = document.querySelector('#accountBody');
-    if (!body) return;
-    body.innerHTML = pageShell('Asiakaspalvelu', `
-      <p>Tarvitsetko apua Kaikki.fi-palvelussa? Lähetä tukipyyntö alla.</p>
-      <form class="support-form" id="supportForm">
-        <label>Aihe<input id="supportSubject" required minlength="3" maxlength="100" placeholder="Esim. ongelma ilmoituksen kanssa"></label>
-        <label>Ilmoituksen numero (valinnainen)<input id="supportListingId" inputmode="numeric" placeholder="Esim. 123"></label>
-        <label>Viesti<textarea id="supportMessage" required minlength="5" maxlength="1500" placeholder="Kerro mitä tapahtui..."></textarea></label>
-        <button class="support-send" type="submit">Lähetä tukipyyntö</button>
-        <div class="settings-saved" id="supportStatus"></div>
-      </form>
-      <div class="support-history"><h3>Viimeisimmät tukipyynnöt</h3><div id="supportHistory"><p>Ladataan...</p></div></div>
-    `);
-    bindBack(body);
-    await loadSupportHistory(body);
-
-    body.querySelector('#supportForm').onsubmit = async e => {
-      e.preventDefault();
-      const status = body.querySelector('#supportStatus');
-      const button = e.target.querySelector('button[type="submit"]');
-      status.classList.remove('settings-error');
-      status.textContent = 'Lähetetään...';
-      button.disabled = true;
-      try {
-        if (!B?.client) throw new Error('Yhteys palvelimeen ei ole käytettävissä.');
-        const session = await B.session();
-        if (!session) {
-          document.querySelector('#login')?.click();
-          throw new Error('Kirjaudu sisään ennen tukipyynnön lähettämistä.');
-        }
-        const subject = body.querySelector('#supportSubject').value.trim();
-        const message = body.querySelector('#supportMessage').value.trim();
-        const rawListing = body.querySelector('#supportListingId').value.trim();
-        const listingId = rawListing ? Number(rawListing) : null;
-        if (rawListing && !Number.isFinite(listingId)) throw new Error('Ilmoituksen numeron pitää olla numero.');
-        const {error} = await B.client.from('support_requests').insert({
-          user_id: session.user.id,
-          subject,
-          message,
-          listing_id: listingId
-        });
-        if (error) throw error;
-        e.target.reset();
-        status.textContent = 'Tukipyyntö lähetetty ✓';
-        await loadSupportHistory(body);
-      } catch (err) {
-        status.classList.add('settings-error');
-        status.textContent = err?.message || 'Tukipyynnön lähetys epäonnistui.';
-      } finally {
-        button.disabled = false;
-      }
-    };
-  }
-
-  function openLegal(type){
-    const body = document.querySelector('#accountBody');
-    if (!body) return;
-    const pages = {
-      terms: ['Käyttöehdot', `<p>Nämä käyttöehdot koskevat Kaikki.fi-palvelun käyttöä.</p><h3>Palvelun käyttö</h3><p>Käyttäjä vastaa ilmoittamiensa tietojen oikeellisuudesta ja siitä, että myytävät tuotteet ja palvelut ovat lainmukaisia.</p><h3>Kaupankäynti</h3><p>Ostaja ja myyjä vastaavat kaupan tiedoista, toimituksesta ja sovituista ehdoista. Kaikki Diili näyttää kaupan etenemisen vaiheittain.</p><h3>Kielletty toiminta</h3><p>Petollinen, harhaanjohtava tai lainvastainen käyttö sekä muiden käyttäjien häirintä on kielletty.</p><h3>Palvelun muutokset</h3><p>Kaikki.fi voi kehittää ja muuttaa palvelun toimintoja. Olennaisista muutoksista kerrotaan palvelussa.</p>`],
-      privacy: ['Tietosuojakäytäntö', `<p>Kaikki.fi käsittelee vain palvelun tarjoamiseen tarvittavia tietoja.</p><h3>Käsiteltävät tiedot</h3><p>Palvelu voi käsitellä tilin tietoja, ilmoitusten tietoja, viestejä, suosikkeja, tukipyyntöjä ja teknisiä käyttötietoja.</p><h3>Käyttötarkoitus</h3><p>Tietoja käytetään palvelun tarjoamiseen, turvallisuuteen, asiakastukeen ja palvelun kehittämiseen.</p><h3>Omat tiedot</h3><p>Käyttäjä voi pyytää omien tietojensa tarkastamista, korjaamista tai poistamista soveltuvan lainsäädännön mukaisesti.</p><h3>Turvallisuus</h3><p>Tietoja suojataan asianmukaisin teknisin ja organisatorisin keinoin.</p>`]
-    };
-    const [title, html] = pages[type];
-    body.innerHTML = pageShell(title, html);
-    bindBack(body);
-  }
-
-  function openCookies(){
-    const body = document.querySelector('#accountBody');
-    if (!body) return;
-    body.innerHTML = pageShell('Evästeasetukset', `<p>Valitse, mitä selaimeen tallennettavia asetuksia Kaikki.fi saa käyttää.</p><div class="cookie-row"><div><strong>Välttämättömät</strong><small style="display:block;color:#7b8798">Tarvitaan palvelun perustoimintoihin</small></div><span>Käytössä</span></div><div class="cookie-row"><div><strong>Toiminnalliset</strong><small style="display:block;color:#7b8798">Muistaa valintoja ja käyttökokemusta</small></div><label class="switch"><input id="functionalCookies" type="checkbox" ${pref('kaikki-cookie-functional')?'checked':''}><span class="slider"></span></label></div><div class="cookie-row"><div><strong>Analytiikka</strong><small style="display:block;color:#7b8798">Auttaa kehittämään palvelua</small></div><label class="switch"><input id="analyticsCookies" type="checkbox" ${pref('kaikki-cookie-analytics',false)?'checked':''}><span class="slider"></span></label></div><div class="settings-saved" id="cookieSaved"></div>`);
-    bindBack(body);
-    ['functionalCookies','analyticsCookies'].forEach(id => body.querySelector('#'+id).onchange = e => {
-      savePref(id === 'functionalCookies' ? 'kaikki-cookie-functional' : 'kaikki-cookie-analytics', e.target.checked);
-      body.querySelector('#cookieSaved').textContent = 'Evästeasetukset tallennettu ✓';
-    });
-  }
-
-  function renderSettings(){
-    const body = document.querySelector('#accountBody');
-    const tabs = document.querySelector('.account-tabs');
-    if (!body || !tabs) return;
-    tabs.querySelectorAll('[data-account-tab]').forEach(b => b.classList.toggle('active', b.dataset.accountTab === 'settings'));
-    const theme = localStorage.getItem('kaikki-theme') || 'system';
-    body.innerHTML = `
-      <div class="settings-wrap">
-        <section class="settings-section">
-          <h3>Ulkoasu</h3><p>Valitse Kaikki.fi:n ulkoasu. Muutos näkyy heti.</p>
-          <div class="theme-options">
-            <label class="theme-choice"><input type="radio" name="kaikkiTheme" value="system" ${theme==='system'?'checked':''}><span class="theme-icon">◐</span><span class="theme-copy"><strong>Laitteen teema</strong><small>Seuraa laitteen asetusta</small></span></label>
-            <label class="theme-choice"><input type="radio" name="kaikkiTheme" value="light" ${theme==='light'?'checked':''}><span class="theme-icon">☀️</span><span class="theme-copy"><strong>Vaalea</strong><small>Vaalea käyttöliittymä</small></span></label>
-            <label class="theme-choice"><input type="radio" name="kaikkiTheme" value="dark" ${theme==='dark'?'checked':''}><span class="theme-icon">🌙</span><span class="theme-copy"><strong>Tumma</strong><small>Tumma käyttöliittymä</small></span></label>
-          </div>
-        </section>
-        <section class="settings-section">
-          <h3>Ilmoitusasetukset</h3><p>Valitse, mistä tapahtumista haluat saada ilmoituksia.</p>
-          <div class="setting-list">
-            <div class="setting-row"><div class="setting-copy"><strong>Viestit</strong><small>Uudet viestit ja vastaukset</small></div><label class="switch"><input data-notify-pref="kaikki-notify-messages" type="checkbox" ${pref('kaikki-notify-messages')?'checked':''}><span class="slider"></span></label></div>
-            <div class="setting-row"><div class="setting-copy"><strong>Varaukset</strong><small>Varauksen tila ja muutokset</small></div><label class="switch"><input data-notify-pref="kaikki-notify-reservations" type="checkbox" ${pref('kaikki-notify-reservations')?'checked':''}><span class="slider"></span></label></div>
-            <div class="setting-row"><div class="setting-copy"><strong>Ilmoitukset ja myynti</strong><small>Myyntiin ja omiin ilmoituksiin liittyvät tapahtumat</small></div><label class="switch"><input data-notify-pref="kaikki-notify-listings" type="checkbox" ${pref('kaikki-notify-listings')?'checked':''}><span class="slider"></span></label></div>
-          </div><div class="settings-saved" id="settingsSaved"></div>
-        </section>
-        <section class="settings-section">
-          <h3>Tuki ja tietosuoja</h3><p>Hallitse vikaraportteja ja avaa palvelun tärkeät tiedot.</p>
-          <div class="setting-list">
-            <div class="setting-row"><div class="setting-copy"><strong>Vikaraportin lähetys</strong><small>Auttaa löytämään teknisiä ongelmia ilman profiilitietoja</small></div><label class="switch"><input id="errorReports" type="checkbox" ${pref('kaikki-error-reports')?'checked':''}><span class="slider"></span></label></div>
-            <div class="setting-row"><div class="setting-copy"><strong>Asiakaspalvelu</strong><small>Ohjeet ja yhteydenotto</small></div><button type="button" class="settings-link" id="customerService">Avaa</button></div>
-            <div class="setting-row"><div class="setting-copy"><strong>Käyttöehdot</strong></div><button type="button" class="settings-link" data-legal="terms">Avaa</button></div>
-            <div class="setting-row"><div class="setting-copy"><strong>Tietosuojakäytäntö</strong></div><button type="button" class="settings-link" data-legal="privacy">Avaa</button></div>
-            <div class="setting-row"><div class="setting-copy"><strong>Evästeasetukset</strong></div><button type="button" class="settings-link" id="cookieSettings">Avaa</button></div>
-          </div>
-        </section>
-      </div>`;
-
-    const saved = body.querySelector('#settingsSaved');
-    const flash = () => { saved.textContent='Asetus tallennettu ✓'; clearTimeout(flash.t); flash.t=setTimeout(()=>saved.textContent='',1400); };
-    body.querySelectorAll('input[name="kaikkiTheme"]').forEach(x => x.onchange = () => { applyTheme(x.value); flash(); });
-    body.querySelectorAll('[data-notify-pref]').forEach(x => x.onchange = () => { savePref(x.dataset.notifyPref,x.checked); flash(); });
-    body.querySelector('#errorReports').onchange = e => { savePref('kaikki-error-reports',e.target.checked); flash(); };
-    body.querySelector('#customerService').onclick = openSupport;
-    body.querySelectorAll('[data-legal]').forEach(b => b.onclick = () => openLegal(b.dataset.legal));
-    body.querySelector('#cookieSettings').onclick = openCookies;
-  }
-
-  function ensureSettingsTab(){
-    const tabs = document.querySelector('.account-tabs');
-    if (!tabs) return;
-    let btn = tabs.querySelector('[data-account-tab="settings"]');
-    if (!btn) {
-      btn = document.createElement('button');
-      btn.type = 'button';
-      btn.dataset.accountTab = 'settings';
-      btn.textContent = '⚙️ Asetukset';
-      tabs.appendChild(btn);
-    }
-    btn.onclick = renderSettings;
-  }
-
-  function hardenPrototypeUI(){
-    document.querySelectorAll('.prototype-note').forEach(el=>el.style.display='none');
-    const footer = document.querySelector('footer');
-    if (footer) footer.textContent = '© 2026 Kaikki.fi';
-  }
-
-  const observer = new MutationObserver(() => { ensureSettingsTab(); hardenPrototypeUI(); });
-  observer.observe(document.body,{subtree:true,childList:true});
-  ensureSettingsTab();
-  hardenPrototypeUI();
+  const style=document.createElement('style');
+  style.textContent=`
+  #accountModal .panel{width:min(760px,calc(100vw - 32px));max-height:min(88vh,860px);overflow-y:auto;padding:28px!important}
+  #accountModal #accountBody{min-width:0}.settings-wrap{margin-top:8px;display:grid;gap:18px}
+  .settings-section{background:#fff;border:1px solid #e6ebf2;border-radius:18px;padding:18px 20px;box-shadow:0 8px 24px rgba(15,23,42,.04)}
+  .settings-section h3{font-size:19px;line-height:1.25;margin:0 0 5px;color:#172033}.settings-section>p{color:#64748b;margin:0 0 16px;font-size:14px;line-height:1.5}
+  .theme-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.theme-choice{position:relative;display:flex;align-items:center;gap:10px;border:1px solid #dbe3ee;border-radius:14px;padding:13px 14px;cursor:pointer;background:#f8fafc;min-height:58px}.theme-choice:has(input:checked){border-color:#1565d8;background:#eaf2ff}.theme-choice input{position:absolute;opacity:0}.theme-icon{font-size:22px}.theme-copy{display:flex;flex-direction:column}.theme-copy strong,.setting-copy strong{font-size:14px;color:#1f2937}.theme-copy small,.setting-copy small{font-size:12px;color:#7b8798}
+  .setting-list{border:1px solid #e8edf4;border-radius:14px;overflow:hidden;background:#fff}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 15px;border-bottom:1px solid #eef2f7;min-height:58px}.setting-row:last-child{border-bottom:0}.setting-copy{min-width:0;flex:1}.setting-copy strong,.setting-copy small{display:block}
+  .settings-link{background:#eef4ff!important;color:#1565d8!important;border:0!important;border-radius:10px!important;padding:9px 14px!important;min-width:74px;font-weight:800!important}.switch{position:relative;width:48px;height:28px;flex:0 0 48px}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;cursor:pointer}.slider:before{content:'';position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}.switch input:checked+.slider{background:#1565d8}.switch input:checked+.slider:before{transform:translateX(20px)}.settings-saved{font-size:12px;color:#15803d;min-height:18px;margin-top:8px}
+  .settings-page{padding:4px 2px 18px}.settings-page-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}.settings-back{border:0!important;background:#eef4ff!important;color:#1565d8!important;border-radius:10px!important;padding:9px 12px!important;font-weight:800!important}.settings-page h2{margin:0;color:#172033}.settings-page-card{border:1px solid #e6ebf2;border-radius:16px;padding:20px;background:#fff}.settings-page-card h3{margin:18px 0 6px;color:#172033}.settings-page-card h3:first-child{margin-top:0}.settings-page-card p,.settings-page-card li{color:#526173;line-height:1.65}.support-form{display:grid;gap:12px}.support-form label{display:grid;gap:5px;font-weight:700;color:#334155}.support-form input,.support-form textarea{width:100%;box-sizing:border-box}.support-form textarea{min-height:120px;resize:vertical}.support-send{background:#1565d8!important;color:#fff!important;border:0!important;border-radius:11px!important;padding:12px 16px!important;font-weight:800!important}.cookie-row{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:14px 0;border-bottom:1px solid #eef2f7}.cookie-row:last-child{border:0}
+  body.kaikki-dark{background:#0f172a;color:#f8fafc}body.kaikki-dark header,body.kaikki-dark .panel,body.kaikki-dark section{background:#111827;color:#f8fafc}body.kaikki-dark .settings-section,body.kaikki-dark .setting-list,body.kaikki-dark .setting-row,body.kaikki-dark .settings-page-card{background:#172033;border-color:#2a3649}body.kaikki-dark .settings-section h3,body.kaikki-dark .setting-copy strong,body.kaikki-dark .theme-copy strong,body.kaikki-dark .settings-page h2,body.kaikki-dark .settings-page-card h3{color:#f8fafc}body.kaikki-dark .settings-section>p,body.kaikki-dark .setting-copy small,body.kaikki-dark .theme-copy small,body.kaikki-dark .settings-page-card p,body.kaikki-dark .settings-page-card li{color:#b9c4d4}
+  @media(max-width:640px){#accountModal .panel{width:calc(100vw - 16px);padding:18px!important}.theme-options{grid-template-columns:1fr}.settings-section{padding:16px}.setting-row{padding:13px 12px}}
+  `;document.head.appendChild(style);
+  function applyTheme(theme){const dark=theme==='dark'||(theme==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.body.classList.toggle('kaikki-dark',dark);localStorage.setItem('kaikki-theme',theme)}
+  applyTheme(localStorage.getItem('kaikki-theme')||'system');matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if((localStorage.getItem('kaikki-theme')||'system')==='system')applyTheme('system')});
+  const pref=(key,def=true)=>localStorage.getItem(key)==null?def:localStorage.getItem(key)!=='off';const savePref=(key,on)=>localStorage.setItem(key,on?'on':'off');
+  const pageShell=(title,html)=>`<div class="settings-page"><div class="settings-page-head"><button type="button" class="settings-back">← Takaisin</button><h2>${title}</h2></div><div class="settings-page-card">${html}</div></div>`;
+  function bindBack(body){body.querySelector('.settings-back')?.addEventListener('click',renderSettings)}
+  function openSupport(){const body=document.querySelector('#accountBody');if(!body)return;body.innerHTML=pageShell('Asiakaspalvelu',`<p>Tarvitsetko apua Kaikki.fi-palvelussa? Lähetä tukipyyntö alla. Kuvaile ongelma mahdollisimman tarkasti.</p><form class="support-form" id="supportForm"><label>Aihe<input id="supportSubject" required maxlength="100" placeholder="Esim. ongelma ilmoituksen kanssa"></label><label>Viesti<textarea id="supportMessage" required maxlength="1500" placeholder="Kerro mitä tapahtui..."></textarea></label><button class="support-send" type="submit">Lähetä tukipyyntö</button><div class="settings-saved" id="supportStatus"></div></form>`);bindBack(body);body.querySelector('#supportForm').onsubmit=e=>{e.preventDefault();const s=body.querySelector('#supportSubject').value.trim(),m=body.querySelector('#supportMessage').value.trim();if(!s||!m)return;const list=JSON.parse(localStorage.getItem('kaikki-support-requests')||'[]');list.unshift({id:Date.now(),subject:s,message:m,created:new Date().toISOString(),status:'open'});localStorage.setItem('kaikki-support-requests',JSON.stringify(list));e.target.reset();body.querySelector('#supportStatus').textContent='Tukipyyntö tallennettu ✓'}}
+  function openLegal(type){const body=document.querySelector('#accountBody');if(!body)return;const pages={terms:['Käyttöehdot',`<p>Nämä käyttöehdot koskevat Kaikki.fi-palvelun käyttöä.</p><h3>Palvelun käyttö</h3><p>Käyttäjä vastaa ilmoittamiensa tietojen oikeellisuudesta ja siitä, että myytävät tuotteet ja palvelut ovat lainmukaisia.</p><h3>Kaupankäynti</h3><p>Ostaja ja myyjä vastaavat kaupan tiedoista, toimituksesta ja sovituista ehdoista. Kaikki Diili -toiminnossa palvelu näyttää kaupan etenemisen vaiheittain.</p><h3>Kielletty toiminta</h3><p>Petollinen, harhaanjohtava tai lainvastainen käyttö sekä muiden käyttäjien häirintä on kielletty.</p><h3>Palvelun muutokset</h3><p>Kaikki.fi voi kehittää ja muuttaa palvelun toimintoja. Olennaisista muutoksista kerrotaan palvelussa.</p>`],privacy:['Tietosuojakäytäntö',`<p>Tässä kerrotaan, miten Kaikki.fi käsittelee palvelun käytössä tarvittavia tietoja.</p><h3>Käsiteltävät tiedot</h3><p>Palvelu voi käsitellä tilin tietoja, ilmoitusten tietoja, viestejä, suosikkeja ja palvelun teknisiä käyttötietoja.</p><h3>Käyttötarkoitus</h3><p>Tietoja käytetään palvelun tarjoamiseen, turvallisuuteen, asiakastukeen ja palvelun kehittämiseen.</p><h3>Omat tiedot</h3><p>Käyttäjä voi pyytää omien tietojensa tarkastamista, korjaamista tai poistamista soveltuvan lainsäädännön mukaisesti.</p><h3>Turvallisuus</h3><p>Tietoja suojataan asianmukaisin teknisin ja organisatorisin keinoin.</p>`]};const [title,html]=pages[type];body.innerHTML=pageShell(title,html);bindBack(body)}
+  function openCookies(){const body=document.querySelector('#accountBody');if(!body)return;body.innerHTML=pageShell('Evästeasetukset',`<p>Valitse, mitä selaimeen tallennettavia asetuksia Kaikki.fi saa käyttää.</p><div class="cookie-row"><div><strong>Välttämättömät</strong><small style="display:block;color:#7b8798">Tarvitaan palvelun perustoimintoihin</small></div><span>Käytössä</span></div><div class="cookie-row"><div><strong>Toiminnalliset</strong><small style="display:block;color:#7b8798">Muistaa valintoja ja käyttökokemusta</small></div><label class="switch"><input id="functionalCookies" type="checkbox" ${pref('kaikki-cookie-functional')?'checked':''}><span class="slider"></span></label></div><div class="cookie-row"><div><strong>Analytiikka</strong><small style="display:block;color:#7b8798">Auttaa kehittämään palvelua</small></div><label class="switch"><input id="analyticsCookies" type="checkbox" ${pref('kaikki-cookie-analytics',false)?'checked':''}><span class="slider"></span></label></div><div class="settings-saved" id="cookieSaved"></div>`);bindBack(body);['functionalCookies','analyticsCookies'].forEach(id=>body.querySelector('#'+id).onchange=e=>{savePref(id==='functionalCookies'?'kaikki-cookie-functional':'kaikki-cookie-analytics',e.target.checked);body.querySelector('#cookieSaved').textContent='Evästeasetukset tallennettu ✓'})}
+  function renderSettings(){const body=document.querySelector('#accountBody'),tabs=document.querySelector('.account-tabs');if(!body||!tabs)return;tabs.querySelectorAll('[data-account-tab]').forEach(b=>b.classList.toggle('active',b.dataset.accountTab==='settings'));const theme=localStorage.getItem('kaikki-theme')||'system';body.innerHTML=`<div class="settings-wrap"><section class="settings-section"><h3>Ulkoasu</h3><p>Valitse Kaikki.fi:n ulkoasu. Muutos näkyy heti.</p><div class="theme-options"><label class="theme-choice"><input type="radio" name="kaikkiTheme" value="system" ${theme==='system'?'checked':''}><span class="theme-icon">◐</span><span class="theme-copy"><strong>Laitteen teema</strong><small>Seuraa laitteen asetusta</small></span></label><label class="theme-choice"><input type="radio" name="kaikkiTheme" value="light" ${theme==='light'?'checked':''}><span class="theme-icon">☀️</span><span class="theme-copy"><strong>Vaalea</strong><small>Vaalea käyttöliittymä</small></span></label><label class="theme-choice"><input type="radio" name="kaikkiTheme" value="dark" ${theme==='dark'?'checked':''}><span class="theme-icon">🌙</span><span class="theme-copy"><strong>Tumma</strong><small>Tumma käyttöliittymä</small></span></label></div></section><section class="settings-section"><h3>Ilmoitusasetukset</h3><p>Valitse, mistä tapahtumista haluat saada ilmoituksia.</p><div class="setting-list"><div class="setting-row"><div class="setting-copy"><strong>Viestit</strong><small>Uudet viestit ja vastaukset</small></div><label class="switch"><input data-notify-pref="kaikki-notify-messages" type="checkbox" ${pref('kaikki-notify-messages')?'checked':''}><span class="slider"></span></label></div><div class="setting-row"><div class="setting-copy"><strong>Varaukset</strong><small>Varauksen tila ja muutokset</small></div><label class="switch"><input data-notify-pref="kaikki-notify-reservations" type="checkbox" ${pref('kaikki-notify-reservations')?'checked':''}><span class="slider"></span></label></div><div class="setting-row"><div class="setting-copy"><strong>Ilmoitukset ja myynti</strong><small>Myyntiin ja omiin ilmoituksiin liittyvät tapahtumat</small></div><label class="switch"><input data-notify-pref="kaikki-notify-listings" type="checkbox" ${pref('kaikki-notify-listings')?'checked':''}><span class="slider"></span></label></div></div><div class="settings-saved" id="settingsSaved"></div></section><section class="settings-section"><h3>Tuki ja tietosuoja</h3><p>Hallitse vikaraportteja ja avaa palvelun tärkeät tiedot.</p><div class="setting-list"><div class="setting-row"><div class="setting-copy"><strong>Vikaraportin lähetys</strong><small>Auttaa löytämään teknisiä ongelmia ilman profiilitietoja</small></div><label class="switch"><input id="errorReports" type="checkbox" ${pref('kaikki-error-reports')?'checked':''}><span class="slider"></span></label></div><div class="setting-row"><div class="setting-copy"><strong>Asiakaspalvelu</strong><small>Ohjeet ja yhteydenotto</small></div><button type="button" class="settings-link" id="customerService">Avaa</button></div><div class="setting-row"><div class="setting-copy"><strong>Käyttöehdot</strong></div><button type="button" class="settings-link" data-legal="terms">Avaa</button></div><div class="setting-row"><div class="setting-copy"><strong>Tietosuojakäytäntö</strong></div><button type="button" class="settings-link" data-legal="privacy">Avaa</button></div><div class="setting-row"><div class="setting-copy"><strong>Evästeasetukset</strong></div><button type="button" class="settings-link" id="cookieSettings">Avaa</button></div></div></section></div>`;const saved=body.querySelector('#settingsSaved'),flash=()=>{saved.textContent='Asetus tallennettu ✓';setTimeout(()=>saved.textContent='',1400)};body.querySelectorAll('input[name="kaikkiTheme"]').forEach(x=>x.onchange=()=>{applyTheme(x.value);flash()});body.querySelectorAll('[data-notify-pref]').forEach(x=>x.onchange=()=>{savePref(x.dataset.notifyPref,x.checked);flash()});body.querySelector('#errorReports').onchange=e=>{savePref('kaikki-error-reports',e.target.checked);flash()};body.querySelector('#customerService').onclick=openSupport;body.querySelectorAll('[data-legal]').forEach(b=>b.onclick=()=>openLegal(b.dataset.legal));body.querySelector('#cookieSettings').onclick=openCookies}
+  function ensureSettingsTab(){const tabs=document.querySelector('.account-tabs');if(!tabs)return;let btn=tabs.querySelector('[data-account-tab="settings"]');if(!btn){btn=document.createElement('button');btn.type='button';btn.dataset.accountTab='settings';btn.textContent='⚙️ Asetukset';tabs.appendChild(btn)}btn.onclick=renderSettings}
+  new MutationObserver(ensureSettingsTab).observe(document.body,{subtree:true,childList:true});ensureSettingsTab();
 })();
