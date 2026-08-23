@@ -2,7 +2,8 @@ import React from 'react';
 import {StyleSheet,Text,View} from 'react-native';
 
 // Rejected Diili progress:
-// 1 Pyyntö is complete, 2 Hyväksyntä is rejected, later steps stay inactive.
+// Only activate rejection styling after the rejection status message itself.
+// This avoids leaking rejected text into an accepted Diili rendered afterwards.
 const previousCreateElement=React.createElement.bind(React);
 let rejectedDetail=false;
 let inSteps=false;
@@ -22,10 +23,23 @@ function isStepDot(type,props){
   return flat.width===26&&flat.height===26&&flat.borderRadius===13;
 }
 
+function reset(){
+  rejectedDetail=false;
+  inSteps=false;
+  dotIndex=0;
+  currentDot=0;
+}
+
 React.createElement=(type,props,...children)=>{
   const text=nodeText(children).trim();
 
-  if(type===Text&&text==='Hylätty'){
+  // Reset immediately when an accepted detail starts rendering.
+  if(type===Text&&(text==='Hyväksytty – odottaa maksua'||text==='Myyjä hyväksyi Diilin. Seuraava vaihe on maksu.')){
+    reset();
+  }
+
+  // Use the rejection explanation as the reliable detail-level marker.
+  if(type===Text&&text==='Myyjä hylkäsi Diilin.'){
     rejectedDetail=true;
     inSteps=false;
     dotIndex=0;
@@ -54,21 +68,18 @@ React.createElement=(type,props,...children)=>{
     if(currentDot===1&&text==='1'){
       children=['✓'];
       props={...props,style:[props?.style,{color:'#fff'}]};
+      currentDot=0;
     }else if(currentDot===2&&text==='2'){
       children=['×'];
       props={...props,style:[props?.style,{color:'#dc2626',fontSize:16}]};
-    }else if(currentDot===2&&text==='Myyjä hyväksyy tai hylkää'){
+      currentDot=0;
+    }else if(text==='Myyjä hyväksyy tai hylkää'){
       children=['Myyjä hylkäsi Diilin'];
       props={...props,style:[props?.style,{color:'#dc2626'}]};
     }
   }
 
-  if(rejectedDetail&&type===Text&&text==='Sulje'){
-    rejectedDetail=false;
-    inSteps=false;
-    dotIndex=0;
-    currentDot=0;
-  }
+  if(rejectedDetail&&type===Text&&text==='Sulje')reset();
 
   return previousCreateElement(type,props,...children);
 };
