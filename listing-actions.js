@@ -171,3 +171,11 @@
   document.addEventListener('click',e=>{ if(e.target.closest?.('[data-open]')) setTimeout(addDetailActions,20); });
   addCardActions();
 })();
+
+(() => {
+  if (document.querySelector('script[data-diili-detail-modal]')) return;
+  const s = document.createElement('script');
+  s.src = 'diili-detail-modal.js?v=20260823-4';
+  s.dataset.diiliDetailModal = '1';
+  document.head.appendChild(s);
+})();
