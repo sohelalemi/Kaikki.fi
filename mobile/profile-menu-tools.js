@@ -88,8 +88,8 @@ function patchRuntime(){
   try{
     const runtime=require('react/jsx-runtime');
     const oldJsx=runtime.jsx,oldJsxs=runtime.jsxs;
-    if(typeof oldJsx==='function')runtime.jsx=(t,p,k)=>{const label=shouldReplace(t,p);return label?oldJsx(FunctionalProfileRow,{rowProps:p,label},k):oldJsx(t,p,k)};
-    if(typeof oldJsxs==='function')runtime.jsxs=(t,p,k)=>{const label=shouldReplace(t,p);return label?oldJsx(FunctionalProfileRow,{rowProps:p,label},k):oldJsxs(t,p,k)};
+    if(typeof oldJsx==='function')runtime.jsx=(t,p,k)=>{const label=shouldReplace(t,p);return label?oldJsx(FunctionalProfileRow,{rowProps:p,label,children:p?.children},k):oldJsx(t,p,k)};
+    if(typeof oldJsxs==='function')runtime.jsxs=(t,p,k)=>{const label=shouldReplace(t,p);return label?oldJsx(FunctionalProfileRow,{rowProps:p,label,children:p?.children},k):oldJsxs(t,p,k)};
   }catch(e){console.warn('profile-menu-tools',e?.message||e)}
 }
 patchRuntime();
