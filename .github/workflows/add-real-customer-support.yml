@@ -14,42 +14,51 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          p=Path('mobile/App.js')
-          s=p.read_text(encoding='utf-8')
 
-          state_anchor="export default function App(){\n"
-          state_code=" const[supportSubject,setSupportSubject]=useState(''),[supportMessage,setSupportMessage]=useState(''),[supportListingId,setSupportListingId]=useState(''),[supportSending,setSupportSending]=useState(false);\n"
+          p = Path('mobile/App.js')
+          s = p.read_text(encoding='utf-8')
+
+          state_anchor = "export default function App(){\n"
+          state_code = " const[supportSubject,setSupportSubject]=useState(''),[supportMessage,setSupportMessage]=useState(''),[supportListingId,setSupportListingId]=useState(''),[supportSending,setSupportSending]=useState(false);\n"
           if 'supportSubject,setSupportSubject' not in s:
-              if state_anchor not in s: raise SystemExit('App state anchor not found')
-              s=s.replace(state_anchor,state_anchor+state_code,1)
+              if state_anchor not in s:
+                  raise SystemExit('App state anchor not found')
+              s = s.replace(state_anchor, state_anchor + state_code, 1)
 
-          func_anchor=" function comingSoon(title){Alert.alert(title,'Tämä toiminto lisätään seuraavassa versiossa.')}"
-          func_code="""\n async function submitSupportRequest(){
-  if(!supportSubject.trim()||!supportMessage.trim()){Alert.alert('Puuttuvat tiedot','Kirjoita aihe ja ongelman kuvaus.');return}
-  setSupportSending(true);
-  const{error}=await supabase.from('support_requests').insert({user_id:session.user.id,email:session.user.email||null,subject:supportSubject.trim(),message:supportMessage.trim(),listing_id:supportListingId.trim()||null});
-  setSupportSending(false);
-  if(error){Alert.alert('Lähetys epäonnistui',error.message);return}
-  setSupportSubject('');setSupportMessage('');setSupportListingId('');
-  Alert.alert('Pyyntö lähetetty','Asiakastukipyyntösi on vastaanotettu.');setTab('profile');
- }
-"""
+          func_anchor = " function comingSoon(title){Alert.alert(title,'Tämä toiminto lisätään seuraavassa versiossa.')}"
+          func_code = (
+              "\n async function submitSupportRequest(){\n"
+              "  if(!supportSubject.trim()||!supportMessage.trim()){Alert.alert('Puuttuvat tiedot','Kirjoita aihe ja ongelman kuvaus.');return}\n"
+              "  setSupportSending(true);\n"
+              "  const{error}=await supabase.from('support_requests').insert({user_id:session.user.id,email:session.user.email||null,subject:supportSubject.trim(),message:supportMessage.trim(),listing_id:supportListingId.trim()||null});\n"
+              "  setSupportSending(false);\n"
+              "  if(error){Alert.alert('Lähetys epäonnistui',error.message);return}\n"
+              "  setSupportSubject('');setSupportMessage('');setSupportListingId('');\n"
+              "  Alert.alert('Pyyntö lähetetty','Asiakastukipyyntösi on vastaanotettu.');setTab('profile');\n"
+              " }\n"
+          )
           if 'async function submitSupportRequest()' not in s:
-              if func_anchor not in s: raise SystemExit('function anchor not found')
-              s=s.replace(func_anchor,func_anchor+func_code,1)
+              if func_anchor not in s:
+                  raise SystemExit('function anchor not found')
+              s = s.replace(func_anchor, func_anchor + func_code, 1)
 
-          old="{menuRow('☏','Asiakastuki',()=>comingSoon('Asiakastuki'),true)}"
-          new="{menuRow('☏','Asiakastuki',()=>setTab('support'),true)}"
-          if old in s: s=s.replace(old,new,1)
-          elif new not in s: raise SystemExit('Asiakastuki menu anchor not found')
+          old = "{menuRow('☏','Asiakastuki',()=>comingSoon('Asiakastuki'),true)}"
+          new = "{menuRow('☏','Asiakastuki',()=>setTab('support'),true)}"
+          if old in s:
+              s = s.replace(old, new, 1)
+          elif new not in s:
+              raise SystemExit('Asiakastuki menu anchor not found')
 
-          view_anchor=" {tab==='profile'&&<ScrollView"
-          support_view=""" {tab==='support'&&<ScrollView contentContainerStyle={s.form}><Pressable onPress={()=>setTab('profile')}><Text style={s.link}>← Oma tili</Text></Pressable><Text style={s.title}>Asiakastuki</Text><Text style={s.helpText}>Lähetä tukipyyntö Kaikki.fi-tukikeskukselle.</Text><Text style={s.fieldLabel}>Aihe</Text><TextInput style={s.input} value={supportSubject} onChangeText={setSupportSubject} placeholder="Esim. ilmoitus, käyttäjä tai Kaikki Diili"/><Text style={s.fieldLabel}>Ilmoituksen numero (valinnainen)</Text><TextInput style={s.input} value={supportListingId} onChangeText={setSupportListingId} placeholder="Esim. 123"/><Text style={s.fieldLabel}>Kuvaile ongelma</Text><TextInput style={[s.input,{height:150,textAlignVertical:'top'}]} multiline value={supportMessage} onChangeText={setSupportMessage} placeholder="Kerro mahdollisimman tarkasti, mitä tapahtui..."/><Pressable style={s.primary} disabled={supportSending} onPress={submitSupportRequest}><Text style={s.primaryText}>{supportSending?'Lähetetään...':'Lähetä tukipyyntö'}</Text></Pressable></ScrollView>}\n"""
+          view_anchor = " {tab==='profile'&&<ScrollView"
+          support_view = (
+              " {tab==='support'&&<ScrollView contentContainerStyle={s.form}><Pressable onPress={()=>setTab('profile')}><Text style={s.link}>← Oma tili</Text></Pressable><Text style={s.title}>Asiakastuki</Text><Text style={s.helpText}>Lähetä tukipyyntö Kaikki.fi-tukikeskukselle.</Text><Text style={s.fieldLabel}>Aihe</Text><TextInput style={s.input} value={supportSubject} onChangeText={setSupportSubject} placeholder=\"Esim. ilmoitus, käyttäjä tai Kaikki Diili\"/><Text style={s.fieldLabel}>Ilmoituksen numero (valinnainen)</Text><TextInput style={s.input} value={supportListingId} onChangeText={setSupportListingId} placeholder=\"Esim. 123\"/><Text style={s.fieldLabel}>Kuvaile ongelma</Text><TextInput style={[s.input,{height:150,textAlignVertical:'top'}]} multiline value={supportMessage} onChangeText={setSupportMessage} placeholder=\"Kerro mahdollisimman tarkasti, mitä tapahtui...\"/><Pressable style={s.primary} disabled={supportSending} onPress={submitSupportRequest}><Text style={s.primaryText}>{supportSending?'Lähetetään...':'Lähetä tukipyyntö'}</Text></Pressable></ScrollView>}\n"
+          )
           if "tab==='support'" not in s:
-              if view_anchor not in s: raise SystemExit('profile view anchor not found')
-              s=s.replace(view_anchor,support_view+view_anchor,1)
+              if view_anchor not in s:
+                  raise SystemExit('profile view anchor not found')
+              s = s.replace(view_anchor, support_view + view_anchor, 1)
 
-          p.write_text(s,encoding='utf-8')
+          p.write_text(s, encoding='utf-8')
       - name: Commit support form
         run: |
           git config user.name "Kaikki.fi"
