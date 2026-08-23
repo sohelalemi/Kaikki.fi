@@ -1,4 +1,5 @@
 import {registerRootComponent} from 'expo';
+import './ios-platform-fix';
 import './layout-fix';
 import './password-eye-fix';
 import './image-zoom-fix';
