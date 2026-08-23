@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "Kaikki.fi",
+    "slug": "kaikki-ios",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "kaikki",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "fi.kaikki.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Kaikki.fi tarvitsee kuvakirjaston käyttöoikeuden ilmoitusten kuvia varten.",
+        "NSLocationWhenInUseUsageDescription": "Kaikki.fi käyttää sijaintia lähellä olevien ilmoitusten näyttämiseen."
+      }
+    }
+  }
+}

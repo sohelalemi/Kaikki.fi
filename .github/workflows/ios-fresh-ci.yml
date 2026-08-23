@@ -1,0 +1,23 @@
+name: iOS Fresh CI
+
+on:
+  push:
+    branches: [ios-fresh]
+    paths:
+      - 'ios-app/**'
+      - '.github/workflows/ios-fresh-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-ios:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install
+      - run: npx expo export --platform ios --output-dir dist-ios
