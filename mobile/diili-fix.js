@@ -24,6 +24,16 @@ function parseEuro(text){
 }
 function rememberPrice(type,props){
   if(type!==Text)return;
+
+  // Marketplace cards always render their title with numberOfLines=2.
+  // This is a reliable boundary marker: never allow the detail-only Diili
+  // injection to leak into a card, even if a previous detail render left
+  // the context flag set.
+  if(props?.numberOfLines===2){
+    detailRenderContext=false;
+    return;
+  }
+
   const flat=StyleSheet.flatten(props?.style)||{};
   const weight=String(flat.fontWeight||'');
   if(flat.fontSize===30&&weight==='900'){
@@ -32,8 +42,8 @@ function rememberPrice(type,props){
     detailRenderContext=true;
     return;
   }
-  // Listing cards use the smaller marketplace price style. Reset the context
-  // there so Kaikki Diili is not injected into every card on the home screen.
+
+  // Extra safety for the compact card price style.
   if(flat.fontSize===18&&weight==='900')detailRenderContext=false;
 }
 
