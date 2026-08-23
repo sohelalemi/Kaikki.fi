@@ -3,6 +3,7 @@ import './layout-fix';
 import './password-eye-fix';
 import './image-zoom-fix';
 import './diili-step-fix';
+import './diili-rejected-step-fix';
 import './oma-diili-v2';
 import './settings-screen-fix';
 import './map-crash-fix';
