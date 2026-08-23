@@ -1,49 +1,45 @@
-// Kaikki Diili for web listing details only.
+// Kaikki Diili for web: listing details + central Oma tili dashboard.
 (() => {
-  let currentListingId=null,busy=false;
+  const B=window.KaikkiBackend;
+  let currentListingId=null,busy=false,currentUserId=null,dealTab='sales';
+  const statusLabel=s=>({pending:'Odottaa myyjää',accepted:'Hyväksytty – odottaa maksua',paid:'Maksettu',shipped:'Lähetetty',completed:'Valmis',cancelled:'Peruttu',rejected:'Hylätty',disputed:'Riita'})[s]||s||'Odottaa';
+  const euro=v=>`${Number(v||0).toLocaleString('fi-FI')} €`;
+  const numericId=raw=>{const n=Number(String(raw||'').replace(/^db-/,''));return Number.isFinite(n)?n:null};
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
   const style=document.createElement('style');
-  style.textContent=`.kaikki-diili-web-btn{width:100%;margin-top:8px;padding:12px 14px;border:0;border-radius:10px;background:#0f766e;color:#fff;font-size:14px;font-weight:800;cursor:pointer}.kaikki-diili-web-btn:disabled{opacity:.6;cursor:wait}.kaikki-diili-web-note{margin:8px 0 0;color:#64748b;font-size:13px;line-height:1.45}`;
+  style.textContent=`
+  .kaikki-diili-web-btn{width:100%;margin-top:8px;padding:12px 14px;border:0;border-radius:10px;background:#0f766e;color:#fff;font-size:14px;font-weight:800;cursor:pointer}.kaikki-diili-web-btn:disabled{opacity:.6;cursor:wait}.kaikki-diili-web-note{margin:8px 0 0;color:#64748b;font-size:13px;line-height:1.45}
+  .diili-web-wrap{display:grid;gap:14px}.diili-web-tabs{display:flex;gap:8px}.diili-web-tabs button{flex:1;background:#eef2f7;color:#475569}.diili-web-tabs button.active{background:#1565d8;color:#fff}.diili-web-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.diili-web-stat{background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center}.diili-web-stat b{display:block;color:#1565d8;font-size:21px}.diili-web-stat span{font-size:12px;color:#64748b}.diili-web-search{width:100%;box-sizing:border-box}.diili-web-card{border:1px solid #e5e7eb;border-radius:14px;padding:14px;display:grid;gap:8px;cursor:pointer;background:#fff}.diili-web-card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.diili-web-badge{background:#eef4ff;color:#1565d8;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;max-width:62%;text-align:center}.diili-web-amount{font-size:22px;font-weight:900;color:#1565d8}.diili-web-meta{font-size:12px;color:#64748b}.diili-web-empty{text-align:center;padding:30px 10px;color:#64748b}.diili-web-empty b{display:block;color:#111827;font-size:19px;margin:8px}.diili-web-info{margin-top:8px;background:#f8fafc;border-radius:14px;padding:14px;color:#475569;line-height:1.7}.diili-web-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.diili-web-actions button{flex:1;min-width:120px}.diili-web-actions .danger{color:#dc2626!important;background:#fff!important;border:1px solid #fecaca!important}`;
   document.head.appendChild(style);
 
-  function numericId(raw){const n=Number(String(raw||'').replace(/^db-/,''));return Number.isFinite(n)?n:null}
   document.addEventListener('click',e=>{const el=e.target.closest?.('[data-open]');if(el?.dataset?.open)currentListingId=el.dataset.open},true);
 
+  async function requireSession(){if(!B?.enabled||!B?.client)throw new Error('Kaikki Diili ei ole vielä yhteydessä palvelimeen.');const s=await B.session();if(!s)throw new Error('Kirjaudu ensin sisään.');return s}
   async function sendDiiliRequest(button,rawId){
-    if(busy)return;
-    const id=numericId(rawId||currentListingId);
-    if(!id){alert('Kaikki Diili toimii vain verkkopalveluun tallennetuissa ilmoituksissa.');return}
-    const backend=window.KaikkiBackend;
-    if(!backend?.enabled||!backend?.client){alert('Kaikki Diili ei ole vielä yhteydessä palvelimeen.');return}
-    const session=await backend.session();
-    if(!session){alert('Kirjaudu ensin sisään ja yritä uudelleen.');document.getElementById('login')?.click();return}
+    if(busy)return;const id=numericId(rawId||currentListingId);if(!id){alert('Kaikki Diili toimii vain verkkopalveluun tallennetuissa ilmoituksissa.');return}
     busy=true;button.disabled=true;const old=button.textContent;button.textContent='Lähetetään…';
-    try{
-      const{data,error}=await backend.client.rpc('create_deal',{p_listing_id:id});if(error)throw error;
-      button.textContent='✓ Diili lähetetty';
-      alert('Kaikki Diili -pyyntö lähetettiin myyjälle.');
-      window.dispatchEvent(new CustomEvent('kaikki:diili-created',{detail:data}));
-    }catch(err){button.disabled=false;button.textContent=old;alert(err?.message||'Diili-pyyntöä ei voitu lähettää.')}finally{busy=false}
+    try{await requireSession();const{data,error}=await B.client.rpc('create_deal',{p_listing_id:id});if(error)throw error;button.textContent='✓ Diili lähetetty';alert('Kaikki Diili -pyyntö lähetettiin myyjälle.');window.dispatchEvent(new CustomEvent('kaikki:diili-created',{detail:data}))}
+    catch(err){button.disabled=false;button.textContent=old;alert(err?.message||'Diili-pyyntöä ei voitu lähettää.');if(String(err?.message||'').includes('Kirjaudu'))document.getElementById('login')?.click()}
+    finally{busy=false}
   }
-
   function makeButton(rawId){const b=document.createElement('button');b.type='button';b.className='kaikki-diili-web-btn';b.textContent='🛡️ Kaikki Diili';b.onclick=e=>{e.stopPropagation();sendDiiliRequest(b,rawId)};return b}
+  function removeCardButtons(){document.querySelectorAll('.card .kaikki-diili-web-btn,.card .listing-diili').forEach(el=>el.remove())}
+  function injectDetails(){const content=document.getElementById('detailsContent');if(!content||content.querySelector('#kaikkiDiiliWebBtn'))return;const modal=document.getElementById('detailsModal');if(modal&&!modal.classList.contains('show'))return;const actions=content.querySelector('.detail-listing-actions');const contact=content.querySelector('#contactBtn');const target=actions||contact?.parentElement||content;const btn=makeButton(currentListingId);btn.id='kaikkiDiiliWebBtn';target.appendChild(btn);const note=document.createElement('p');note.className='kaikki-diili-web-note';note.textContent='Myyjä hyväksyy pyynnön ennen maksua.';target.appendChild(note)}
 
-  function removeCardButtons(){
-    document.querySelectorAll('.card .kaikki-diili-web-btn,.card .listing-diili').forEach(el=>el.remove());
-  }
+  async function getDeals(){const s=await requireSession();currentUserId=s.user.id;const{data,error}=await B.client.from('deals').select('*').or(`buyer_id.eq.${currentUserId},seller_id.eq.${currentUserId}`).order('created_at',{ascending:false});if(error)throw error;return data||[]}
+  async function rpc(name,args){const{data,error}=await B.client.rpc(name,args);if(error)throw error;return data}
+  async function runDealAction(d,kind){if(kind==='accept')return rpc('seller_decide_deal',{p_deal_id:d.id,p_accept:true});if(kind==='reject')return rpc('seller_decide_deal',{p_deal_id:d.id,p_accept:false});if(kind==='cancel')return rpc('cancel_deal',{p_deal_id:d.id});if(kind==='ship')return rpc('mark_deal_shipped',{p_deal_id:d.id});if(kind==='received')return rpc('confirm_deal_received',{p_deal_id:d.id})}
+  function dealActionButtons(d){const seller=d.seller_id===currentUserId,buyer=d.buyer_id===currentUserId,buttons=[];if(seller&&d.status==='pending')buttons.push(['Hyväksy','accept'],['Hylkää','reject']);if(buyer&&['pending','accepted'].includes(d.status))buttons.push(['Peruuta','cancel']);if(seller&&d.status==='paid')buttons.push(['Merkitse lähetetyksi','ship']);if(buyer&&d.status==='shipped')buttons.push(['Vahvista vastaanotetuksi','received']);return buttons}
+  async function openDeal(d){const choices=dealActionButtons(d);if(!choices.length){alert(`Diili #${d.id}\nTila: ${statusLabel(d.status)}\nSumma: ${euro(d.amount)}\nIlmoitus: #${d.listing_id||'-'}`);return}const box=document.createElement('div');box.className='diili-web-actions';choices.forEach(([label,kind])=>{const b=document.createElement('button');b.textContent=label;if(kind==='reject'||kind==='cancel')b.className='danger';b.onclick=async()=>{b.disabled=true;try{await runDealAction(d,kind);await renderDiiliDashboard()}catch(e){alert(e?.message||'Toiminto epäonnistui.')}finally{b.disabled=false}};box.appendChild(b)});const card=document.querySelector(`[data-diili-id="${d.id}"]`);if(card&&!card.querySelector('.diili-web-actions'))card.appendChild(box)}
 
-  function injectDetails(){
-    const content=document.getElementById('detailsContent');
-    if(!content||content.querySelector('#kaikkiDiiliWebBtn'))return;
-    const modal=document.getElementById('detailsModal');
-    if(modal&&!modal.classList.contains('show'))return;
-    const actions=content.querySelector('.detail-listing-actions');
-    const contact=content.querySelector('#contactBtn');
-    const target=actions||contact?.parentElement||content;
-    const btn=makeButton(currentListingId);btn.id='kaikkiDiiliWebBtn';target.appendChild(btn);
-    const note=document.createElement('p');note.className='kaikki-diili-web-note';note.textContent='Myyjä hyväksyy pyynnön ennen maksua.';target.appendChild(note);
-  }
+  async function renderDiiliDashboard(){const body=document.getElementById('accountBody');if(!body)return;body.innerHTML='<p>Kaikki Diili ladataan…</p>';try{const deals=await getDeals();const own=deals.filter(d=>dealTab==='sales'?d.seller_id===currentUserId:d.buyer_id===currentUserId);const reservations=own.filter(d=>['pending','accepted'].includes(d.status)).length,payments=own.filter(d=>['paid','shipped'].includes(d.status)).length,completed=own.filter(d=>d.status==='completed').length;body.innerHTML=`<div class="diili-web-wrap"><input class="diili-web-search" id="diiliWebSearch" placeholder="Hae kaikista tekemistäsi kaupoista"><div class="diili-web-tabs"><button data-diili-tab="sales" class="${dealTab==='sales'?'active':''}">Myynnit</button><button data-diili-tab="buys" class="${dealTab==='buys'?'active':''}">Ostot</button></div><div class="diili-web-summary"><div class="diili-web-stat"><b>${reservations}</b><span>Varaukset</span></div><div class="diili-web-stat"><b>${payments}</b><span>Maksut</span></div><div class="diili-web-stat"><b>${completed}</b><span>Kaupat</span></div></div><div id="diiliWebList"></div><div class="diili-web-info"><strong>🛡️ Kaikki Diili</strong><br>✓ Ostajan ja myyjän oma tapahtumanäkymä<br>✓ Myyjä hyväksyy Diilin<br>✓ Maksu vahvistetaan maksupalvelusta<br>✓ Lähetys ja vastaanotto vahvistetaan erikseen</div></div>`;
+      const list=document.getElementById('diiliWebList');
+      const paint=q=>{const needle=(q||'').trim().toLowerCase(),filtered=own.filter(d=>!needle||String(d.id).includes(needle)||String(d.listing_id||'').includes(needle)||statusLabel(d.status).toLowerCase().includes(needle));list.innerHTML=filtered.length?filtered.map(d=>`<div class="diili-web-card" data-diili-id="${d.id}"><div class="diili-web-card-top"><strong>Diili #${d.id}</strong><span class="diili-web-badge">${esc(statusLabel(d.status))}</span></div><div class="diili-web-amount">${euro(d.amount)}</div><div class="diili-web-meta">Ilmoitus #${d.listing_id||'-'}</div></div>`).join(''):`<div class="diili-web-empty">🛡️<b>${dealTab==='sales'?'Ei myyntejä':'Ei ostoja'}</b>${dealTab==='sales'?'Kaikki Diili -myyntisi näkyvät täällä.':'Kaikki Diilillä tekemäsi ostot näkyvät täällä.'}</div>`;filtered.forEach(d=>list.querySelector(`[data-diili-id="${d.id}"]`)?.addEventListener('click',()=>openDeal(d)))};
+      paint('');document.getElementById('diiliWebSearch').oninput=e=>paint(e.target.value);document.querySelectorAll('[data-diili-tab]').forEach(b=>b.onclick=()=>{dealTab=b.dataset.diiliTab;renderDiiliDashboard()});
+    }catch(e){body.innerHTML=`<p>${esc(e?.message||'Kaikki Diiliä ei voitu avata.')}</p>`}}
 
-  function inject(){removeCardButtons();injectDetails()}
-  const observer=new MutationObserver(inject);observer.observe(document.body,{childList:true,subtree:true});
-  document.addEventListener('DOMContentLoaded',inject);setTimeout(inject,300);setTimeout(inject,1200);
+  function injectAccountTab(){const tabs=document.querySelector('#accountContent .account-tabs');if(!tabs||tabs.querySelector('[data-account-tab="diili"]'))return;const b=document.createElement('button');b.type='button';b.dataset.accountTab='diili';b.textContent='🛡️ Kaikki Diili';b.onclick=()=>{tabs.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderDiiliDashboard()};tabs.appendChild(b)}
+  function inject(){removeCardButtons();injectDetails();injectAccountTab()}
+  const observer=new MutationObserver(inject);observer.observe(document.body,{childList:true,subtree:true});document.addEventListener('DOMContentLoaded',inject);window.addEventListener('kaikki:diili-created',()=>{if(document.getElementById('accountModal')?.classList.contains('show'))renderDiiliDashboard()});setTimeout(inject,300);setTimeout(inject,1200);
 })();
