@@ -21,7 +21,8 @@
       "buildNumber": "1",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Kaikki.fi tarvitsee kuvakirjaston käyttöoikeuden ilmoitus- ja profiilikuvien valintaan.",
-        "NSLocationWhenInUseUsageDescription": "Kaikki.fi käyttää sijaintiasi ilmoituksen tarkan sijainnin valintaan."
+        "NSLocationWhenInUseUsageDescription": "Kaikki.fi käyttää sijaintiasi ilmoituksen tarkan sijainnin valintaan.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
