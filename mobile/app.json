@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "scheme": "kaikki",
     "userInterfaceStyle": "automatic",
-    "icon": "./assets/kaikki-icon.png",
     "updates": {
       "enabled": false
     },
@@ -35,10 +34,9 @@
         "backgroundColor": "#FFFFFF"
       },
       "adaptiveIcon": {
-        "foregroundImage": "./assets/kaikki-icon.png",
         "backgroundColor": "#FFFFFF"
       }
     },
-    "plugins": ["expo-notifications","expo-image-picker","expo-location"]
+    "plugins": ["expo-notifications", "expo-image-picker", "expo-location"]
   }
 }
