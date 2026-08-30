@@ -12,9 +12,8 @@ const replacements = [
   ["['Antiikki ja taide','🏺','Kaikki','#f5ebff']", "['Antiikki ja taide','🏺','Antiikki ja taide','#f5ebff']"]
 ];
 
-for (const [from, to] of replacements) {
-  source = source.replace(from, to);
-}
+for (const [from, to] of replacements) source = source.replace(from, to);
 
 fs.writeFileSync(appPath, source);
 console.log('Fixed iOS category actions so every visible category selects its own category.');
+require('./fix-ios-home-polish.js');
