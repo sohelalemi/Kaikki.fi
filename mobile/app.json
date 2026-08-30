@@ -5,6 +5,7 @@
     "version": "0.5.20",
     "orientation": "portrait",
     "scheme": "kaikki",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "updates": {
       "enabled": false
@@ -18,6 +19,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "fi.kaikki.app",
       "buildNumber": "1",
+      "icon": "./assets/icon.png",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Kaikki.fi tarvitsee kuvakirjaston käyttöoikeuden ilmoitus- ja profiilikuvien valintaan.",
         "NSLocationWhenInUseUsageDescription": "Kaikki.fi käyttää sijaintiasi ilmoituksen tarkan sijainnin valintaan.",
@@ -34,6 +36,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       }
     },
