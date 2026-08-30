@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "postinstall": "node scripts/apply-web-home.js",
+    "postinstall": "node scripts/apply-web-home.js && node scripts/fix-ios-category-actions.js",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
