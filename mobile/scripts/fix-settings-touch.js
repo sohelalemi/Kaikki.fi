@@ -29,21 +29,25 @@ s=s.slice(0,swStart)+swNew+s.slice(swEnd);
 
 const languageOld="settingsRow('Kieli',languageName,()=>setTab('settings-language'))";
 const languageNew=`settingsRow('Kieli',languageName,()=>Alert.alert('Kieli','Valitse kieli',[{text:'Suomi',onPress:()=>chooseLanguage('fi')},{text:'English',onPress:()=>chooseLanguage('en')},{text:'فارسی',onPress:()=>chooseLanguage('fa')},{text:'Русский',onPress:()=>chooseLanguage('ru')},{text:'Peruuta',style:'cancel'}]))`;
-if(!s.includes(languageOld)){
+if(s.includes(languageOld)){
+  s=s.replace(languageOld,languageNew);
+}else if(!s.includes("Alert.alert('Kieli'")){
   console.error('Kieli action not found');
   process.exit(1);
 }
-s=s.replace(languageOld,languageNew);
 
 const themeOld="settingsRow('Teema',themeName,()=>setTab('settings-theme'),true)";
 const themeNew=`settingsRow('Teema',themeName,()=>Alert.alert('Teema','Valitse teema',[{text:'Järjestelmän mukaan',onPress:()=>chooseTheme('system')},{text:'Vaalea',onPress:()=>chooseTheme('light')},{text:'Tumma',onPress:()=>chooseTheme('dark')},{text:'Peruuta',style:'cancel'}]),true)`;
-if(!s.includes(themeOld)){
+if(s.includes(themeOld)){
+  s=s.replace(themeOld,themeNew);
+}else if(!s.includes("Alert.alert('Teema'")){
   console.error('Teema action not found');
   process.exit(1);
 }
-s=s.replace(themeOld,themeNew);
 
-s=s.replace("tab==='settings'&&<ScrollView contentContainerStyle=","tab==='settings'&&<ScrollView keyboardShouldPersistTaps=\"always\" contentContainerStyle=");
+if(!s.includes('keyboardShouldPersistTaps="always"')){
+  s=s.replace("tab==='settings'&&<ScrollView contentContainerStyle=","tab==='settings'&&<ScrollView keyboardShouldPersistTaps=\"always\" contentContainerStyle=");
+}
 
 if(!s.includes("Alert.alert('Kieli'")||!s.includes("Alert.alert('Teema'")||!s.includes('onValueChange={v=>changeSettingFlag(key,v)}')){
   console.error('Settings native controls verification failed');
@@ -51,4 +55,4 @@ if(!s.includes("Alert.alert('Kieli'")||!s.includes("Alert.alert('Teema'")||!s.in
 }
 
 fs.writeFileSync(p,s);
-console.log('Settings native controls applied: direct language/theme dialogs and native switches.');
+console.log('Settings native controls applied safely (repeatable on GitHub and EAS).');
