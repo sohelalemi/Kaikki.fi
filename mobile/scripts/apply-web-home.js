@@ -48,14 +48,14 @@ const platformHome = String.raw`{tab==='home'&&(Platform.OS==='ios'?
       ['Asunnot','🏠','Asunnot','#fff0e7'],
       ['Elektroniikka','📱','Elektroniikka','#f2ebff'],
       ['Koti & sisustus','🛋️','Koti','#edf9ef'],
-      ['Vapaa-aika','🚲','Palvelut','#eaf8f8'],
-      ['Lapset ja vanhemmat','👶','Kaikki','#fff8df'],
-      ['Eläintarvikkeet','🐾','Kaikki','#f6eee8'],
-      ['Piha ja remontointi','🔨','Kaikki','#eaf8ef'],
-      ['Antiikki ja taide','🏺','Kaikki','#f5ebff'],
-      ['Muut','•••','Kaikki','#eff3f8']
+      ['Vapaa-aika','🚲','Vapaa-aika','#eaf8f8'],
+      ['Lapset ja vanhemmat','👶','Lapset ja vanhemmat','#fff8df'],
+      ['Eläintarvikkeet','🐾','Eläintarvikkeet','#f6eee8'],
+      ['Piha ja remontointi','🔨','Piha ja remontointi','#eaf8ef'],
+      ['Antiikki ja taide','🏺','Antiikki ja taide','#f5ebff'],
+      ['Muut','•••','Muut','#eff3f8']
     ].map(([label,icon,value,bg])=><Pressable key={label} onPress={()=>setCategory(value)} style={{width:'19%',alignItems:'center'}}>
-      <View style={{width:64,height:64,borderRadius:19,backgroundColor:bg,alignItems:'center',justifyContent:'center',borderWidth:category===value&&value!=='Kaikki'?2:0,borderColor:'#1677e8'}}>
+      <View style={{width:64,height:64,borderRadius:19,backgroundColor:bg,alignItems:'center',justifyContent:'center',borderWidth:category===value?2:0,borderColor:'#1677e8'}}>
         <Text style={{fontSize:29,fontWeight:'800',color:'#334155'}}>{icon}</Text>
       </View>
       <Text numberOfLines={2} style={{fontSize:10.5,fontWeight:'800',color:'#1e293b',textAlign:'center',lineHeight:13,marginTop:6}}>{label}</Text>
