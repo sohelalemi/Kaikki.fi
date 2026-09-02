@@ -9,22 +9,27 @@ if(!s.includes("import SettingsScreen from'./src/SettingsScreen';")){
   s=s.replace(anchor,anchor+"\nimport SettingsScreen from'./src/SettingsScreen';");
 }
 
-// Render settings in a native full-screen Modal so no app overlay, header or
-// absolutely-positioned navigation can intercept taps on iOS.
-if(!s.includes('Modal,Pressable')){
-  s=s.replace('Image,Linking,Pressable','Image,Linking,Modal,Pressable');
+// Add Modal to the existing react-native named import regardless of import order.
+if(!/import\{[^}]*\bModal\b[^}]*\}from'react-native';/.test(s)){
+  const next=s.replace(/import\{([^}]*)\}from'react-native';/,(_,names)=>{
+    const list=names.split(',').map(x=>x.trim()).filter(Boolean);
+    if(!list.includes('Modal'))list.push('Modal');
+    return `import{${list.join(',')}}from'react-native';`;
+  });
+  if(next===s)throw new Error('Settings install: react-native import not found');
+  s=next;
 }
 
 s=s.replace("{menuRow('⚙','Asetukset',()=>comingSoon('Asetukset'))}","{menuRow('⚙','Asetukset',()=>setTab('settings'))}");
 
-if(!s.includes('visible={tab===\'settings\'}')){
+if(!s.includes("visible={tab==='settings'}")){
   const anchor=" {tab==='profile'&&<ScrollView contentContainerStyle={s.profilePage}>";
   if(!s.includes(anchor))throw new Error('Settings install: profile screen anchor not found');
   const modal=" <Modal visible={tab==='settings'} animationType=\"none\" presentationStyle=\"fullScreen\" onRequestClose={()=>setTab('profile')}><SafeAreaView style={{flex:1,backgroundColor:'#f6f7f9'}}><SettingsScreen session={session} onBack={()=>setTab('profile')}/></SafeAreaView></Modal>\n";
   s=s.replace(anchor,modal+anchor);
 }
 
-if(!s.includes("setTab('settings')")||!s.includes("visible={tab==='settings'}")||!s.includes('Modal,Pressable')){
+if(!s.includes("setTab('settings')")||!s.includes("visible={tab==='settings'}")||!/import\{[^}]*\bModal\b[^}]*\}from'react-native';/.test(s)){
   throw new Error('Settings modal install verification failed');
 }
 
