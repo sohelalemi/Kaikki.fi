@@ -9,29 +9,20 @@ if(!s.includes("import SettingsScreen from'./src/SettingsScreen';")){
   s=s.replace(anchor,anchor+"\nimport SettingsScreen from'./src/SettingsScreen';");
 }
 
-// Add Modal to the existing react-native named import regardless of import order.
-if(!/import\{[^}]*\bModal\b[^}]*\}from'react-native';/.test(s)){
-  const next=s.replace(/import\{([^}]*)\}from'react-native';/,(_,names)=>{
-    const list=names.split(',').map(x=>x.trim()).filter(Boolean);
-    if(!list.includes('Modal'))list.push('Modal');
-    return `import{${list.join(',')}}from'react-native';`;
-  });
-  if(next===s)throw new Error('Settings install: react-native import not found');
-  s=next;
-}
-
 s=s.replace("{menuRow('⚙','Asetukset',()=>comingSoon('Asetukset'))}","{menuRow('⚙','Asetukset',()=>setTab('settings'))}");
 
-if(!s.includes("visible={tab==='settings'}")){
-  const anchor=" {tab==='profile'&&<ScrollView contentContainerStyle={s.profilePage}>";
-  if(!s.includes(anchor))throw new Error('Settings install: profile screen anchor not found');
-  const modal=" <Modal visible={tab==='settings'} animationType=\"none\" presentationStyle=\"fullScreen\" onRequestClose={()=>setTab('profile')}><SafeAreaView style={{flex:1,backgroundColor:'#f6f7f9'}}><SettingsScreen session={session} onBack={()=>setTab('profile')}/></SafeAreaView></Modal>\n";
-  s=s.replace(anchor,modal+anchor);
+// Settings is rendered with an early return. When tab === 'settings', the legacy
+// app tree, fixed bottom navigation and any sibling overlays are not mounted at all.
+if(!s.includes("if(tab==='settings')return <SafeAreaView")){
+  const anchor=" return <SafeAreaView style={s.container}>";
+  if(!s.includes(anchor))throw new Error('Settings install: root return anchor not found');
+  const settingsReturn=" if(tab==='settings')return <SafeAreaView style={{flex:1,backgroundColor:'#f6f7f9'}}><SettingsScreen session={session} onBack={()=>setTab('profile')}/></SafeAreaView>;\n";
+  s=s.replace(anchor,settingsReturn+anchor);
 }
 
-if(!s.includes("setTab('settings')")||!s.includes("visible={tab==='settings'}")||!/import\{[^}]*\bModal\b[^}]*\}from'react-native';/.test(s)){
-  throw new Error('Settings modal install verification failed');
+if(!s.includes("setTab('settings')")||!s.includes("if(tab==='settings')return <SafeAreaView")){
+  throw new Error('Settings root-screen install verification failed');
 }
 
 fs.writeFileSync(p,s);
-console.log('Installed SettingsScreen in isolated full-screen iOS Modal.');
+console.log('Installed SettingsScreen as isolated root screen.');
