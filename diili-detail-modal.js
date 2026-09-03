@@ -14,7 +14,7 @@
   };
   const hints = {
     pending: 'Myyjän hyväksyntää odotetaan.',
-    accepted: 'Myyjä on hyväksynyt Diilin. Seuraava vaihe on maksu.',
+    accepted: 'Myyjä on hyväksynyt Diilin. Testitilassa ostaja voi vahvistaa maksuvaiheen ilman oikeaa veloitusta.',
     paid: 'Maksu on vahvistettu. Myyjä voi toimittaa tuotteen.',
     shipped: 'Tuote on merkitty lähetetyksi. Ostaja vahvistaa vastaanoton.',
     completed: 'Kauppa on valmis.',
@@ -35,7 +35,7 @@
   .diili-detail-status{margin-top:14px;padding:14px;border-radius:14px;background:#f8fafc;border:1px solid #e5e7eb}.diili-detail-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#eaf2ff;color:#1565d8;font-weight:800;font-size:12px}.diili-detail-status p{margin:8px 0 0;color:#475569;line-height:1.5}
   .diili-detail-people{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.diili-detail-box{padding:12px;border:1px solid #e5e7eb;border-radius:13px}.diili-detail-box small{display:block;color:#64748b;margin-bottom:4px}.diili-detail-box strong{color:#111827}
   .diili-detail-steps{margin-top:16px}.diili-detail-steps h3{margin:0 0 10px}.diili-step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #eef2f7}.diili-step:last-child{border-bottom:0}.diili-step-dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#e5e7eb;color:#64748b;font-size:12px;font-weight:900;flex:0 0 24px}.diili-step.done .diili-step-dot{background:#1565d8;color:#fff}.diili-step.active .diili-step-dot{background:#dbeafe;color:#1565d8;border:2px solid #1565d8}.diili-step-copy b{display:block;font-size:14px}.diili-step-copy span{font-size:12px;color:#64748b}
-  .diili-detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.diili-detail-actions button{flex:1;min-width:130px;padding:12px;border-radius:11px;border:0;background:#1565d8;color:#fff;font-weight:800;cursor:pointer}.diili-detail-actions .secondary{background:#eef4ff;color:#1565d8}.diili-detail-actions .danger{background:#fff;color:#dc2626;border:1px solid #fecaca}
+  .diili-detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.diili-detail-actions button{flex:1;min-width:130px;padding:12px;border-radius:11px;border:0;background:#1565d8;color:#fff;font-weight:800;cursor:pointer}.diili-detail-actions .secondary{background:#eef4ff;color:#1565d8}.diili-detail-actions .danger{background:#fff;color:#dc2626;border:1px solid #fecaca}.diili-detail-actions .testpay{background:#0f766e;color:#fff}
   @media(max-width:560px){
     #diiliDetailModal{align-items:flex-end;justify-content:center;padding:0;background:rgba(15,23,42,.44)}
     .diili-detail-panel{width:100%;max-width:none;max-height:94dvh;border-radius:22px 22px 0 0;padding:14px 14px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -14px 44px rgba(15,23,42,.22)}
@@ -68,6 +68,7 @@
     if(kind==='accept'){name='seller_decide_deal';args={p_deal_id:deal.id,p_accept:true}}
     if(kind==='reject'){name='seller_decide_deal';args={p_deal_id:deal.id,p_accept:false}}
     if(kind==='cancel'){name='cancel_deal';args={p_deal_id:deal.id}}
+    if(kind==='testpay'){name='test_mark_deal_paid';args={p_deal_id:deal.id}}
     if(kind==='ship'){name='mark_deal_shipped';args={p_deal_id:deal.id}}
     if(kind==='received'){name='confirm_deal_received';args={p_deal_id:deal.id}}
     if(!name)return;
@@ -77,7 +78,8 @@
   function actionButtons(deal,userId){
     const seller=deal.seller_id===userId,buyer=deal.buyer_id===userId,arr=[];
     if(seller&&deal.status==='pending')arr.push(['Hyväksy','accept',''],['Hylkää','reject','danger']);
-    if(buyer&&['pending','accepted'].includes(deal.status))arr.push(['Peruuta','cancel','danger']);
+    if(buyer&&deal.status==='pending')arr.push(['Peruuta','cancel','danger']);
+    if(buyer&&deal.status==='accepted')arr.push(['Testimaksu (ei veloitusta)','testpay','testpay'],['Peruuta','cancel','danger']);
     if(seller&&deal.status==='paid')arr.push(['Merkitse lähetetyksi','ship','']);
     if(buyer&&deal.status==='shipped')arr.push(['Vahvista vastaanotetuksi','received','']);
     return arr;
@@ -96,7 +98,7 @@
       const actions=actionButtons(deal,s.user.id);
       content.innerHTML=`<div class="diili-detail-head"><h2>🛡️ Kaikki Diili #${deal.id}</h2><button class="diili-detail-close" type="button">×</button></div><div class="diili-detail-product">${img?`<img class="diili-detail-img" src="${esc(img)}" alt="">`:'<div class="diili-detail-fallback">📦</div>'}<div><div class="diili-detail-title">${esc(listing?.title||`Ilmoitus #${deal.listing_id||'-'}`)}</div><div class="diili-detail-price">${euro(deal.amount||listing?.price)}</div><div class="diili-detail-sub">Ilmoitus #${deal.listing_id||'-'}</div></div></div><div class="diili-detail-status"><span class="diili-detail-badge">${esc(labels[deal.status]||deal.status)}</span><p>${esc(hints[deal.status]||'')}</p></div><div class="diili-detail-people"><div class="diili-detail-box"><small>Myyjä</small><strong>${deal.seller_id===s.user.id?'Sinä':esc(deal.seller_name||'Kaikki-käyttäjä')}</strong></div><div class="diili-detail-box"><small>Ostaja</small><strong>${deal.buyer_id===s.user.id?'Sinä':esc(deal.buyer_name||'Kaikki-käyttäjä')}</strong></div></div><div class="diili-detail-steps"><h3>Kaupan eteneminen</h3>${stepHtml}</div><div class="diili-detail-actions">${actions.map(([label,kind,cls])=>`<button type="button" data-diili-action="${kind}" class="${cls}">${label}</button>`).join('')}<button type="button" class="secondary" data-diili-close>Sulje</button></div>`;
       content.querySelector('.diili-detail-close').onclick=close;content.querySelector('[data-diili-close]').onclick=close;
-      content.querySelectorAll('[data-diili-action]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await runAction(deal,b.dataset.diiliAction);close();document.querySelector('[data-account-tab="diili"]')?.click()}catch(e){alert(e?.message||'Toiminto epäonnistui.')}finally{b.disabled=false}});
+      content.querySelectorAll('[data-diili-action]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{if(b.dataset.diiliAction==='testpay'&&!confirm('TESTIMAKSU: Rahaa ei veloiteta. Merkitäänkö maksu testissä vahvistetuksi?'))return;await runAction(deal,b.dataset.diiliAction);if(b.dataset.diiliAction==='testpay')alert('Testimaksu vahvistettu. Rahaa ei veloitettu.');close();document.querySelector('[data-account-tab="diili"]')?.click()}catch(e){alert(e?.message||'Toiminto epäonnistui.')}finally{b.disabled=false}});
     }catch(e){content.innerHTML=`<div class="diili-detail-head"><h2>Kaikki Diili</h2><button class="diili-detail-close" type="button">×</button></div><p>${esc(e?.message||'Diiliä ei voitu avata.')}</p>`;content.querySelector('.diili-detail-close').onclick=close;}
   }
 
