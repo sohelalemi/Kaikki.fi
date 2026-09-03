@@ -23,12 +23,15 @@ const platformHome = String.raw`{tab==='home'&&(Platform.OS==='ios'?
     <View style={{height:60,marginTop:20,backgroundColor:'#fff',borderRadius:30,paddingLeft:16,paddingRight:6,flexDirection:'row',alignItems:'center'}}>
       <Text style={{fontSize:23,color:'#64748b',marginRight:8}}>⌕</Text>
       <TextInput style={{flex:1,fontSize:15.5,color:'#0f172a'}} value={query} onChangeText={setQuery} placeholder="Mitä etsit?" placeholderTextColor="#9aa7b8"/>
-      <Pressable style={{width:48,height:48,borderRadius:24,backgroundColor:'#1677e8',alignItems:'center',justifyContent:'center'}}><Text style={{color:'#fff',fontSize:24,fontWeight:'900'}}>⌕</Text></Pressable>
+      <Pressable onPress={()=>{}} style={{width:48,height:48,borderRadius:24,backgroundColor:'#1677e8',alignItems:'center',justifyContent:'center'}}><Text style={{color:'#fff',fontSize:24,fontWeight:'900'}}>⌕</Text></Pressable>
     </View>
     <View style={{flexDirection:'row',gap:8,marginTop:14}}>
       {[
-        ['🛡️','Turvallista','kaupankäyntiä'],['💬','Helppoa','viestintää'],['♡','Suosikit',''],['⚑','Koko','Suomi']
-      ].map(([icon,a,b])=><View key={a} style={{flex:1,minHeight:58,borderRadius:16,backgroundColor:'rgba(255,255,255,.10)',alignItems:'center',justifyContent:'center',paddingHorizontal:4}}><Text style={{fontSize:17}}>{icon}</Text><Text style={{fontSize:9.5,color:'#fff',fontWeight:'800',textAlign:'center',marginTop:3}}>{a}</Text>{b?<Text style={{fontSize:9.5,color:'#fff',fontWeight:'800',textAlign:'center'}}>{b}</Text>:null}</View>)}
+        ['🛡️','Turvallista','kaupankäyntiä',()=>Alert.alert('Turvallista kaupankäyntiä','Tarkista tuote ennen maksua, käytä sovelluksen viestejä ja vältä epäilyttäviä maksupyyntöjä.')],
+        ['💬','Helppoa','viestintää',()=>setTab('messages')],
+        ['♡','Suosikit','',()=>setTab('favorites')],
+        ['⚑','Koko','Suomi',()=>{setQuery('');setCategory('Kaikki');Alert.alert('Koko Suomi','Näytetään ilmoituksia koko Suomesta.')}]
+      ].map(([icon,a,b,onPress])=><Pressable key={a} onPress={onPress} style={({pressed})=>({flex:1,minHeight:58,borderRadius:16,backgroundColor:pressed?'rgba(255,255,255,.18)':'rgba(255,255,255,.10)',alignItems:'center',justifyContent:'center',paddingHorizontal:4})}><Text style={{fontSize:17}}>{icon}</Text><Text style={{fontSize:9.5,color:'#fff',fontWeight:'800',textAlign:'center',marginTop:3}}>{a}</Text>{b?<Text style={{fontSize:9.5,color:'#fff',fontWeight:'800',textAlign:'center'}}>{b}</Text>:null}</Pressable>)}
     </View>
   </View>
   <View style={{paddingHorizontal:16,paddingTop:24,paddingBottom:10,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}><Text style={{fontSize:21,fontWeight:'900',color:'#0f172a'}}>Kategoriat</Text><Pressable onPress={()=>setCategory('Kaikki')}><Text style={{fontSize:13,fontWeight:'800',color:'#1677e8'}}>Näytä kaikki  ›</Text></Pressable></View>
@@ -49,4 +52,4 @@ const platformHome = String.raw`{tab==='home'&&(Platform.OS==='ios'?
 if (!homePattern.test(source)) { console.error('Could not find the existing home view in App.js'); process.exit(1); }
 source = source.replace(homePattern, platformHome);
 fs.writeFileSync(appPath, source);
-console.log('Applied platform-specific Kaikki.fi home: iOS premium layout with three latest listings per row, Android web layout.');
+console.log('Applied platform-specific Kaikki.fi home: iOS premium layout with working quick actions, Android web layout.');
