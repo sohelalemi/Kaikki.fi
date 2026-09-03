@@ -8,7 +8,6 @@ import './oma-diili-v2';
 import './profile-menu-tools';
 import './support-screen-v2';
 import './profile-edit-screen-v2';
-import './settings-screen-fix';
 import './map-crash-fix';
 import './identity-verification';
 
